@@ -183,14 +183,13 @@ function formatCurrencyValue(value) {
 }
 
 function openAdminModal() {
-  adminLoginModal.classList.remove("hidden");
   adminLoginError.classList.add("hidden");
   adminPasswordInput.value = "";
-  adminPasswordInput.focus();
+  openModal(adminLoginModal, adminPasswordInput);
 }
 
 function closeAdminModal() {
-  adminLoginModal.classList.add("hidden");
+  closeModal(adminLoginModal);
   adminPasswordInput.value = "";
 }
 
@@ -304,6 +303,37 @@ function setPhotoViewerImage(index) {
   });
 }
 
+function showPhotoAt(index) {
+  if (!currentPhotoSet.length) {
+    return;
+  }
+
+  const targetIndex = Math.min(
+    Math.max(index, 0),
+    currentPhotoSet.length - 1
+  );
+  setPhotoViewerImage(targetIndex);
+}
+
+function showPrevPhoto() {
+  if (!currentPhotoSet.length) {
+    return;
+  }
+
+  const prevIndex =
+    (currentPhotoIndex - 1 + currentPhotoSet.length) % currentPhotoSet.length;
+  setPhotoViewerImage(prevIndex);
+}
+
+function showNextPhoto() {
+  if (!currentPhotoSet.length) {
+    return;
+  }
+
+  const nextIndex = (currentPhotoIndex + 1) % currentPhotoSet.length;
+  setPhotoViewerImage(nextIndex);
+}
+
 function openPhotoViewer({ photos, title, subtitle = "", startIndex = 0 }) {
   if (!Array.isArray(photos) || photos.length === 0) {
     return;
@@ -334,11 +364,11 @@ function openPhotoViewer({ photos, title, subtitle = "", startIndex = 0 }) {
   });
 
   setPhotoViewerImage(Math.min(startIndex, photos.length - 1));
-  photoViewerModal.classList.remove("hidden");
+  openModal(photoViewerModal, photoViewerClose);
 }
 
 function closePhotoViewer() {
-  photoViewerModal.classList.add("hidden");
+  closeModal(photoViewerModal);
   currentPhotoSet = [];
   currentPhotoTitle = "";
   currentPhotoSubtitle = "";
@@ -352,11 +382,11 @@ function closePhotoViewer() {
 
 function openEventGalleryModal(selectAlbumId = activeAlbumId) {
   renderEventGallery(selectAlbumId);
-  eventGalleryModal.classList.remove("hidden");
+  openModal(eventGalleryModal, eventGalleryClose);
 }
 
 function closeEventGalleryModal() {
-  eventGalleryModal.classList.add("hidden");
+  closeModal(eventGalleryModal);
 }
 
 function updateAdminUI() {
@@ -686,6 +716,8 @@ function displayActiveAlbum() {
     );
     const image = document.createElement("img");
     image.src = photo;
+    image.loading = "lazy";
+    image.decoding = "async";
     image.alt = `${album.title} - foto ${index + 1}`;
     button.appendChild(image);
     button.addEventListener("click", () =>
@@ -803,7 +835,7 @@ async function handleClassifiedPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    classifiedPhotoDraft = classifiedPhotoDraft.concat(newPhotos);
+    classifiedPhotoDraft = [...classifiedPhotoDraft, ...newPhotos];
     updateClassifiedPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -838,7 +870,7 @@ async function handleAlbumPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    albumPhotoDraft = albumPhotoDraft.concat(newPhotos);
+    albumPhotoDraft = [...albumPhotoDraft, ...newPhotos];
     updateAlbumPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -906,19 +938,19 @@ adminLoginModal.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape") {
-    return;
-  }
-
-  if (!adminLoginModal.classList.contains("hidden")) {
+  if (!adminLoginModal.classList.contains("hidden") && event.key === "Escape") {
     closeAdminModal();
   }
 
   if (!photoViewerModal.classList.contains("hidden")) {
-    closePhotoViewer();
+    if (event.key === "Escape") closePhotoViewer();
+    if (event.key === "ArrowLeft") showPrevPhoto();
+    if (event.key === "ArrowRight") showNextPhoto();
+    if (event.key === "Home") showPhotoAt(0);
+    if (event.key === "End") showPhotoAt(currentPhotoSet.length - 1);
   }
 
-  if (!eventGalleryModal.classList.contains("hidden")) {
+  if (!eventGalleryModal.classList.contains("hidden") && event.key === "Escape") {
     closeEventGalleryModal();
   }
 });
@@ -1030,7 +1062,7 @@ classifiedForm.addEventListener("submit", (event) => {
     price: formattedPrice,
     condition,
     description,
-    photos: [...classifiedPhotoDraft],
+    photos: cloneArray(classifiedPhotoDraft),
   };
 
   if (editingClassifiedIndex !== null) {
@@ -1073,7 +1105,7 @@ albumForm.addEventListener("submit", (event) => {
     date,
     description,
     icon,
-    photos: [...albumPhotoDraft],
+    photos: cloneArray(albumPhotoDraft),
   };
 
   if (editingAlbumId !== null) {
@@ -1166,7 +1198,7 @@ classifiedList.addEventListener("click", (event) => {
     }
     document.getElementById("classifiedCondition").value = item.condition;
     document.getElementById("classifiedDescription").value = item.description;
-    classifiedPhotoDraft = [...(item.photos || [])];
+    classifiedPhotoDraft = cloneArray(item.photos);
     classifiedPhotoInput.value = "";
     updateClassifiedPhotoPreview();
     editingClassifiedIndex = index;
@@ -1220,7 +1252,7 @@ albumAdminList.addEventListener("click", (event) => {
     if (albumIconSelect) {
       albumIconSelect.value = album.icon || DEFAULT_ALBUM_ICON;
     }
-    albumPhotoDraft = [...album.photos];
+    albumPhotoDraft = cloneArray(album.photos);
     albumPhotoInput.value = "";
     updateAlbumPhotoPreview();
     editingAlbumId = album.id;
