@@ -200,7 +200,23 @@ a {
 .widget-grid {
   display: grid;
   gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.widget-grid > .forecast--widget {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 720px) {
+  .widget-grid {
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+    align-content: start;
+  }
+
+  .widget-grid > .forecast--widget {
+    grid-column: 1 / -1;
+  }
 }
 
 .card {
