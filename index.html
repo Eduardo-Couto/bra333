@@ -257,6 +257,68 @@
               <figcaption>Regata interna - Pódio colaborativo</figcaption>
             </figure>
           </div>
+
+          <div class="media-board">
+            <div>
+              <h3>Eventos &amp; Regatas</h3>
+              <p class="text--muted">
+                Acesse álbuns completos em um popup dedicado sem poluir a página.
+              </p>
+            </div>
+            <button class="btn btn--primary" type="button" id="openAlbumModal">
+              Ver acervo
+            </button>
+          </div>
+
+          <form class="admin-form hidden" id="albumForm" novalidate>
+            <h3>Publicar álbum de evento</h3>
+            <div class="form-grid">
+              <label class="input">
+                <span class="input__label">Título</span>
+                <input type="text" id="albumTitle" required />
+              </label>
+              <label class="input">
+                <span class="input__label">Data</span>
+                <input type="date" id="albumDate" required />
+              </label>
+            </div>
+            <label class="input">
+              <span class="input__label">Descrição do evento</span>
+              <textarea id="albumDescription" rows="3" required></textarea>
+            </label>
+            <div class="form-grid form-grid--full">
+              <label class="input">
+                <span class="input__label">Fotos (máx. 12)</span>
+                <input
+                  type="file"
+                  id="albumPhotos"
+                  accept="image/*"
+                  multiple
+                  aria-describedby="albumPhotosHint"
+                />
+                <span class="input__hint" id="albumPhotosHint"
+                  >Arraste os melhores registros. O primeiro será a capa.</span
+                >
+              </label>
+              <div class="photo-preview" id="albumPhotoPreview" aria-live="polite"></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary" id="albumSubmitBtn">
+                Publicar álbum
+              </button>
+              <button type="button" class="btn btn--ghost hidden" id="albumCancelBtn">
+                Cancelar edição
+              </button>
+            </div>
+          </form>
+
+          <div class="album-admin hidden" id="albumAdminPanel">
+            <h3>Organizar acervo</h3>
+            <p class="text--muted">
+              Reordene a vitrine principal e edite detalhes sempre que precisar.
+            </p>
+            <ul class="album-admin__list" id="albumAdminList"></ul>
+          </div>
         </section>
 
         <section class="panel" id="classificados">
@@ -316,6 +378,26 @@
               <span class="input__label">Descrição</span>
               <textarea id="classifiedDescription" rows="3" required></textarea>
             </label>
+            <div class="form-grid form-grid--full">
+              <label class="input">
+                <span class="input__label">Fotos do anúncio (máx. 4)</span>
+                <input
+                  type="file"
+                  id="classifiedPhotos"
+                  accept="image/*"
+                  multiple
+                  aria-describedby="classifiedPhotosHint"
+                />
+                <span class="input__hint" id="classifiedPhotosHint"
+                  >Envie até quatro imagens em boa resolução.</span
+                >
+              </label>
+              <div
+                class="photo-preview"
+                id="classifiedPhotoPreview"
+                aria-live="polite"
+              ></div>
+            </div>
             <div class="form-actions">
               <button type="submit" class="btn btn--primary" id="classifiedSubmitBtn">
                 Salvar anúncio
@@ -363,6 +445,11 @@
           </div>
         </div>
         <p class="classified__description"></p>
+        <div class="classified__media hidden">
+          <button type="button" class="btn btn--ghost classified__photos-btn">
+            Ver fotos do anúncio
+          </button>
+        </div>
         <div class="classified__footer">
           <span class="badge badge--condition"></span>
           <span class="classified__price"></span>
@@ -394,6 +481,74 @@
           <p class="form-error hidden" id="adminLoginError">Senha incorreta. Tente novamente.</p>
           <button type="submit" class="btn btn--primary">Entrar</button>
         </form>
+      </div>
+    </div>
+
+    <div
+      class="modal modal--wide hidden"
+      id="photoViewerModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photoViewerTitle"
+    >
+      <div class="modal__overlay" data-action="close"></div>
+      <div class="modal__content">
+        <button type="button" class="modal__close" id="photoViewerClose" aria-label="Fechar galeria de fotos">
+          ×
+        </button>
+        <div class="photo-viewer">
+          <div class="photo-viewer__header">
+            <h2 id="photoViewerTitle"></h2>
+            <p class="text--muted" id="photoViewerSubtitle"></p>
+          </div>
+          <div class="photo-viewer__stage">
+            <img id="photoViewerImage" alt="Foto selecionada" />
+          </div>
+          <div class="photo-viewer__thumbs" id="photoViewerThumbs" role="list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal modal--wide hidden"
+      id="eventGalleryModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="eventGalleryTitle"
+    >
+      <div class="modal__overlay" data-action="close"></div>
+      <div class="modal__content modal__content--split">
+        <button type="button" class="modal__close" id="eventGalleryClose" aria-label="Fechar acervo de eventos">
+          ×
+        </button>
+        <div class="event-gallery">
+          <header class="event-gallery__header">
+            <h2 id="eventGalleryTitle">Acervo de eventos &amp; regatas</h2>
+            <p class="text--muted">
+              Escolha um álbum para visualizar as fotos capturadas pela flotilha.
+            </p>
+          </header>
+          <div class="event-gallery__body">
+            <aside class="event-gallery__list" aria-label="Lista de álbuns">
+              <ul id="eventAlbumList"></ul>
+            </aside>
+            <section class="event-gallery__preview" aria-live="polite">
+              <div class="event-gallery__empty hidden" id="eventGalleryEmpty">
+                <p class="text--muted">
+                  Ainda não há álbuns publicados. Volte em breve ou publique um na área administrativa.
+                </p>
+              </div>
+              <div class="event-gallery__album hidden" id="eventGalleryAlbum">
+                <header>
+                  <h3 id="eventAlbumTitle"></h3>
+                  <p class="event-gallery__meta" id="eventAlbumMeta"></p>
+                  <p class="text--muted" id="eventAlbumDescription"></p>
+                </header>
+                <div class="event-gallery__grid" id="eventAlbumGrid"></div>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
     </div>
 
