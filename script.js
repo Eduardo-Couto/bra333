@@ -294,6 +294,37 @@ function setPhotoViewerImage(index) {
   });
 }
 
+function showPhotoAt(index) {
+  if (!currentPhotoSet.length) {
+    return;
+  }
+
+  const targetIndex = Math.min(
+    Math.max(index, 0),
+    currentPhotoSet.length - 1
+  );
+  setPhotoViewerImage(targetIndex);
+}
+
+function showPrevPhoto() {
+  if (!currentPhotoSet.length) {
+    return;
+  }
+
+  const prevIndex =
+    (currentPhotoIndex - 1 + currentPhotoSet.length) % currentPhotoSet.length;
+  setPhotoViewerImage(prevIndex);
+}
+
+function showNextPhoto() {
+  if (!currentPhotoSet.length) {
+    return;
+  }
+
+  const nextIndex = (currentPhotoIndex + 1) % currentPhotoSet.length;
+  setPhotoViewerImage(nextIndex);
+}
+
 function openPhotoViewer({ photos, title, subtitle = "", startIndex = 0 }) {
   if (!Array.isArray(photos) || photos.length === 0) {
     return;
@@ -890,19 +921,19 @@ adminLoginModal.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape") {
-    return;
-  }
-
-  if (!adminLoginModal.classList.contains("hidden")) {
+  if (!adminLoginModal.classList.contains("hidden") && event.key === "Escape") {
     closeAdminModal();
   }
 
   if (!photoViewerModal.classList.contains("hidden")) {
-    closePhotoViewer();
+    if (event.key === "Escape") closePhotoViewer();
+    if (event.key === "ArrowLeft") showPrevPhoto();
+    if (event.key === "ArrowRight") showNextPhoto();
+    if (event.key === "Home") showPhotoAt(0);
+    if (event.key === "End") showPhotoAt(currentPhotoSet.length - 1);
   }
 
-  if (!eventGalleryModal.classList.contains("hidden")) {
+  if (!eventGalleryModal.classList.contains("hidden") && event.key === "Escape") {
     closeEventGalleryModal();
   }
 });
