@@ -172,6 +172,10 @@ let currentPhotoTitle = "";
 let currentPhotoSubtitle = "";
 let currentPhotoIndex = 0;
 
+function cloneArray(value) {
+  return Array.isArray(value) ? [...value] : [];
+}
+
 function openAdminModal() {
   adminLoginModal.classList.remove("hidden");
   adminLoginError.classList.add("hidden");
@@ -1009,7 +1013,7 @@ classifiedForm.addEventListener("submit", (event) => {
     price,
     condition,
     description,
-    photos: [...classifiedPhotoDraft],
+    photos: cloneArray(classifiedPhotoDraft),
   };
 
   if (editingClassifiedIndex !== null) {
@@ -1052,7 +1056,7 @@ albumForm.addEventListener("submit", (event) => {
     date,
     description,
     icon,
-    photos: [...albumPhotoDraft],
+    photos: cloneArray(albumPhotoDraft),
   };
 
   if (editingAlbumId !== null) {
@@ -1143,7 +1147,7 @@ classifiedList.addEventListener("click", (event) => {
     document.getElementById("classifiedPrice").value = item.price;
     document.getElementById("classifiedCondition").value = item.condition;
     document.getElementById("classifiedDescription").value = item.description;
-    classifiedPhotoDraft = [...(item.photos || [])];
+    classifiedPhotoDraft = cloneArray(item.photos);
     classifiedPhotoInput.value = "";
     updateClassifiedPhotoPreview();
     editingClassifiedIndex = index;
@@ -1197,7 +1201,7 @@ albumAdminList.addEventListener("click", (event) => {
     if (albumIconSelect) {
       albumIconSelect.value = album.icon || DEFAULT_ALBUM_ICON;
     }
-    albumPhotoDraft = [...album.photos];
+    albumPhotoDraft = cloneArray(album.photos);
     albumPhotoInput.value = "";
     updateAlbumPhotoPreview();
     editingAlbumId = album.id;
