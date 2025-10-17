@@ -172,15 +172,58 @@ let currentPhotoTitle = "";
 let currentPhotoSubtitle = "";
 let currentPhotoIndex = 0;
 
+let lastFocus = null;
+function trapFocus(modal) {
+  const selectors = [
+    "a[href]",
+    "button:not([disabled])",
+    "input",
+    "select",
+    "textarea",
+    "[tabindex]:not([tabindex='-1'])",
+  ];
+  const nodes = modal.querySelectorAll(selectors.join(","));
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  function onKey(e) {
+    if (e.key !== "Tab") return;
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+  modal.addEventListener("keydown", onKey);
+  return () => modal.removeEventListener("keydown", onKey);
+}
+
+let releaseTrap = null;
+function openModal(modal, focusEl) {
+  lastFocus = document.activeElement;
+  modal.classList.remove("hidden");
+  if (releaseTrap) releaseTrap();
+  releaseTrap = trapFocus(modal);
+  (focusEl || modal.querySelector("[autofocus]") || modal).focus();
+}
+function closeModal(modal) {
+  modal.classList.add("hidden");
+  if (releaseTrap) {
+    releaseTrap();
+    releaseTrap = null;
+  }
+  if (lastFocus) lastFocus.focus();
+}
+
 function openAdminModal() {
-  adminLoginModal.classList.remove("hidden");
   adminLoginError.classList.add("hidden");
   adminPasswordInput.value = "";
-  adminPasswordInput.focus();
+  openModal(adminLoginModal, adminPasswordInput);
 }
 
 function closeAdminModal() {
-  adminLoginModal.classList.add("hidden");
+  closeModal(adminLoginModal);
   adminPasswordInput.value = "";
 }
 
@@ -324,11 +367,11 @@ function openPhotoViewer({ photos, title, subtitle = "", startIndex = 0 }) {
   });
 
   setPhotoViewerImage(Math.min(startIndex, photos.length - 1));
-  photoViewerModal.classList.remove("hidden");
+  openModal(photoViewerModal, photoViewerClose);
 }
 
 function closePhotoViewer() {
-  photoViewerModal.classList.add("hidden");
+  closeModal(photoViewerModal);
   currentPhotoSet = [];
   currentPhotoTitle = "";
   currentPhotoSubtitle = "";
@@ -342,11 +385,11 @@ function closePhotoViewer() {
 
 function openEventGalleryModal(selectAlbumId = activeAlbumId) {
   renderEventGallery(selectAlbumId);
-  eventGalleryModal.classList.remove("hidden");
+  openModal(eventGalleryModal, eventGalleryClose);
 }
 
 function closeEventGalleryModal() {
-  eventGalleryModal.classList.add("hidden");
+  closeModal(eventGalleryModal);
 }
 
 function updateAdminUI() {
