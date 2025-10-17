@@ -793,7 +793,7 @@ async function handleClassifiedPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    classifiedPhotoDraft = classifiedPhotoDraft.concat(newPhotos);
+    classifiedPhotoDraft = [...classifiedPhotoDraft, ...newPhotos];
     updateClassifiedPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -828,7 +828,7 @@ async function handleAlbumPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    albumPhotoDraft = albumPhotoDraft.concat(newPhotos);
+    albumPhotoDraft = [...albumPhotoDraft, ...newPhotos];
     updateAlbumPhotoPreview();
   } catch (error) {
     console.error(error);
