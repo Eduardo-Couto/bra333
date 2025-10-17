@@ -680,6 +680,8 @@ function displayActiveAlbum() {
     );
     const image = document.createElement("img");
     image.src = photo;
+    image.loading = "lazy";
+    image.decoding = "async";
     image.alt = `${album.title} - foto ${index + 1}`;
     button.appendChild(image);
     button.addEventListener("click", () =>
