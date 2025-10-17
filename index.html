@@ -234,29 +234,12 @@
               Registre seus highlights e inspire os próximos desafios.
             </p>
           </div>
-          <div class="gallery">
-            <figure class="gallery__item">
-              <img
-                src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=600&q=80"
-                alt="Wingfoil em manobra sobre água cristalina"
-              />
-              <figcaption>Downwind do nascer do sol - Equipe avançada</figcaption>
-            </figure>
-            <figure class="gallery__item">
-              <img
-                src="https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?auto=format&fit=crop&w=600&q=80"
-                alt="Atleta preparando equipamento de wingfoil na areia"
-              />
-              <figcaption>Clinica de setup - Preparando o quiver</figcaption>
-            </figure>
-            <figure class="gallery__item">
-              <img
-                src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=80"
-                alt="Grupo comemorando na praia com pranchas"
-              />
-              <figcaption>Regata interna - Pódio colaborativo</figcaption>
-            </figure>
-          </div>
+          <div
+            class="gallery"
+            id="galleryHighlightList"
+            aria-live="polite"
+            aria-label="Destaques recentes do acervo"
+          ></div>
 
           <div class="media-board">
             <div>
@@ -266,7 +249,7 @@
               </p>
             </div>
             <button class="btn btn--primary" type="button" id="openAlbumModal">
-              Ver acervo
+              Ver acervo completo
             </button>
           </div>
 
@@ -285,6 +268,20 @@
             <label class="input">
               <span class="input__label">Descrição do evento</span>
               <textarea id="albumDescription" rows="3" required></textarea>
+            </label>
+            <label class="input">
+              <span class="input__label">Ícone do destaque</span>
+              <select id="albumIcon">
+                <option value="📸">📸 Registro fotográfico</option>
+                <option value="🏁">🏁 Regatas oficiais</option>
+                <option value="🌅">🌅 Expedições &amp; downwinds</option>
+                <option value="🤝">🤝 Treinos colaborativos</option>
+                <option value="🎯">🎯 Clínicas técnicas</option>
+              </select>
+              <span class="input__hint"
+                >Selecione o emoji que melhor representa o álbum exibido na
+                vitrine.</span
+              >
             </label>
             <div class="form-grid form-grid--full">
               <label class="input">
