@@ -719,6 +719,8 @@ function displayActiveAlbum() {
     );
     const image = document.createElement("img");
     image.src = photo;
+    image.loading = "lazy";
+    image.decoding = "async";
     image.alt = `${album.title} - foto ${index + 1}`;
     button.appendChild(image);
     button.addEventListener("click", () =>
@@ -836,7 +838,7 @@ async function handleClassifiedPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    classifiedPhotoDraft = classifiedPhotoDraft.concat(newPhotos);
+    classifiedPhotoDraft = [...classifiedPhotoDraft, ...newPhotos];
     updateClassifiedPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -871,7 +873,7 @@ async function handleAlbumPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    albumPhotoDraft = albumPhotoDraft.concat(newPhotos);
+    albumPhotoDraft = [...albumPhotoDraft, ...newPhotos];
     updateAlbumPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -1052,7 +1054,7 @@ classifiedForm.addEventListener("submit", (event) => {
     price,
     condition,
     description,
-    photos: [...classifiedPhotoDraft],
+    photos: cloneArray(classifiedPhotoDraft),
   };
 
   if (editingClassifiedIndex !== null) {
@@ -1095,7 +1097,7 @@ albumForm.addEventListener("submit", (event) => {
     date,
     description,
     icon,
-    photos: [...albumPhotoDraft],
+    photos: cloneArray(albumPhotoDraft),
   };
 
   if (editingAlbumId !== null) {
@@ -1186,7 +1188,7 @@ classifiedList.addEventListener("click", (event) => {
     document.getElementById("classifiedPrice").value = item.price;
     document.getElementById("classifiedCondition").value = item.condition;
     document.getElementById("classifiedDescription").value = item.description;
-    classifiedPhotoDraft = [...(item.photos || [])];
+    classifiedPhotoDraft = cloneArray(item.photos);
     classifiedPhotoInput.value = "";
     updateClassifiedPhotoPreview();
     editingClassifiedIndex = index;
@@ -1240,7 +1242,7 @@ albumAdminList.addEventListener("click", (event) => {
     if (albumIconSelect) {
       albumIconSelect.value = album.icon || DEFAULT_ALBUM_ICON;
     }
-    albumPhotoDraft = [...album.photos];
+    albumPhotoDraft = cloneArray(album.photos);
     albumPhotoInput.value = "";
     updateAlbumPhotoPreview();
     editingAlbumId = album.id;
