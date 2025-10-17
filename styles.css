@@ -19,6 +19,10 @@
   box-sizing: border-box;
 }
 
+.hidden {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: var(--font-primary);
@@ -303,8 +307,9 @@ a {
 
 .calendar__meta {
   display: flex;
-  gap: 10px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
 }
 
 .badge {
@@ -389,6 +394,27 @@ a {
   box-shadow: 0 22px 35px -22px rgba(12, 104, 197, 0.8);
 }
 
+.btn--ghost {
+  background: rgba(15, 24, 39, 0.04);
+  color: var(--color-text);
+  border: 1px solid rgba(15, 24, 39, 0.12);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+}
+
+.btn--ghost:hover {
+  background: rgba(15, 24, 39, 0.08);
+}
+
+.btn--danger {
+  color: #b91c1c;
+  border-color: rgba(185, 28, 28, 0.3);
+}
+
+.btn--danger:hover {
+  background: rgba(185, 28, 28, 0.08);
+}
+
 .btn--outline {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -411,6 +437,27 @@ a {
 
 .admin-form.hidden {
   display: none;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-actions.hidden {
+  display: none;
+}
+
+.admin-actions--inline {
+  justify-content: flex-end;
+  margin-top: auto;
 }
 
 .form-grid {
@@ -487,6 +534,61 @@ a {
 .classified__price {
   font-size: 1.1rem;
   color: var(--color-accent-dark);
+}
+
+.form-error {
+  color: #b91c1c;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+
+.form-error.hidden {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+}
+
+.modal__content {
+  position: relative;
+  background: var(--color-surface);
+  padding: 36px;
+  border-radius: var(--radius-lg);
+  width: min(420px, 90vw);
+  box-shadow: 0 40px 90px -40px rgba(17, 24, 39, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal__close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: var(--color-muted);
+}
+
+.modal__close:hover {
+  color: var(--color-text);
 }
 
 @media (max-width: 1080px) {
