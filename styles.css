@@ -193,6 +193,12 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
+.widget-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
 .card {
   background: #ffffff;
   border-radius: var(--radius-md);
@@ -226,58 +232,26 @@ a {
   font-size: 1.3rem;
 }
 
-.metric {
-  font-size: 1.7rem;
-  font-weight: 700;
-  color: var(--color-accent);
-}
-
-.forecast__metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+.forecast--widget .text--muted {
   margin: 0;
 }
 
-.forecast__metrics div {
-  background: rgba(15, 155, 255, 0.05);
+.widget-card__frame {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
   border-radius: var(--radius-sm);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  overflow: hidden;
+  background: rgba(15, 155, 255, 0.04);
+  border: 1px solid rgba(15, 155, 255, 0.12);
 }
 
-.forecast__metrics dt {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-muted);
-}
-
-.forecast__metrics dd {
-  margin: 0;
-  font-weight: 600;
-}
-
-.camera-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.chip {
-  background: rgba(15, 155, 255, 0.12);
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  color: var(--color-accent-dark);
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.chip:hover {
-  background: rgba(15, 155, 255, 0.24);
-  color: var(--color-accent);
+.widget-card__frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #fff;
 }
 
 .calendar {
@@ -548,6 +522,10 @@ a {
     width: 100%;
     justify-content: center;
   }
+
+  .widget-card__frame {
+    min-height: 320px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -557,10 +535,6 @@ a {
 
   .panel {
     padding: 24px;
-  }
-
-  .forecast__metrics {
-    grid-template-columns: 1fr;
   }
 
   .calendar__item {
@@ -580,5 +554,9 @@ a {
   .pill-toggle {
     justify-content: space-between;
     width: 100%;
+  }
+
+  .widget-card__frame {
+    min-height: 280px;
   }
 }
