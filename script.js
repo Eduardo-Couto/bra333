@@ -71,6 +71,7 @@ const albumData = [
     date: "2024-07-06",
     description:
       "Dia clássico de sudoeste constante. Largadas cronometradas e chegada diante do Pão de Açúcar.",
+    icon: "🏁",
     photos: [
       "https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?auto=format&fit=crop&w=1100&q=80",
       "https://images.unsplash.com/photo-1510662145379-0a3f4e49f06e?auto=format&fit=crop&w=1100&q=80",
@@ -84,6 +85,7 @@ const albumData = [
     date: "2024-06-22",
     description:
       "Marcamos posições de marcação e simulamos situações de boia com troca de role entre os atletas.",
+    icon: "🤝",
     photos: [
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1100&q=80",
       "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=1100&q=80",
@@ -131,6 +133,7 @@ const albumPhotoPreview = document.getElementById("albumPhotoPreview");
 const albumAdminPanel = document.getElementById("albumAdminPanel");
 const albumAdminList = document.getElementById("albumAdminList");
 const openAlbumModalBtn = document.getElementById("openAlbumModal");
+const galleryHighlightList = document.getElementById("galleryHighlightList");
 
 const photoViewerModal = document.getElementById("photoViewerModal");
 const photoViewerClose = document.getElementById("photoViewerClose");
@@ -148,10 +151,12 @@ const eventAlbumTitle = document.getElementById("eventAlbumTitle");
 const eventAlbumMeta = document.getElementById("eventAlbumMeta");
 const eventAlbumDescription = document.getElementById("eventAlbumDescription");
 const eventAlbumGrid = document.getElementById("eventAlbumGrid");
+const albumIconSelect = document.getElementById("albumIcon");
 
 const ADMIN_PASSWORD = "flotilha2024";
 const MAX_CLASSIFIED_PHOTOS = 4;
 const MAX_ALBUM_PHOTOS = 12;
+const DEFAULT_ALBUM_ICON = "📸";
 
 let isAdmin = false;
 let editingEventIndex = null;
@@ -199,6 +204,9 @@ function resetAlbumForm() {
   editingAlbumId = null;
   albumSubmitBtn.textContent = "Publicar álbum";
   albumCancelBtn.classList.add("hidden");
+  if (albumIconSelect) {
+    albumIconSelect.value = DEFAULT_ALBUM_ICON;
+  }
   albumPhotoDraft = [];
   albumPhotoInput.value = "";
   updateAlbumPhotoPreview();
@@ -330,8 +338,8 @@ function closePhotoViewer() {
   photoViewerThumbs.innerHTML = "";
 }
 
-function openEventGalleryModal() {
-  renderEventGallery(activeAlbumId);
+function openEventGalleryModal(selectAlbumId = activeAlbumId) {
+  renderEventGallery(selectAlbumId);
   eventGalleryModal.classList.remove("hidden");
 }
 
@@ -525,10 +533,18 @@ function renderAlbumAdminList() {
     listItem.className = "album-admin__item";
     listItem.dataset.albumId = String(album.id);
 
+    const icon = document.createElement("span");
+    icon.className = "album-admin__icon";
+    icon.textContent = album.icon || DEFAULT_ALBUM_ICON;
+
     const cover = document.createElement("img");
     cover.className = "album-admin__cover";
     cover.src = album.photos[0];
     cover.alt = `Capa do álbum ${album.title}`;
+
+    const media = document.createElement("div");
+    media.className = "album-admin__media";
+    media.append(icon, cover);
 
     const info = document.createElement("div");
     const title = document.createElement("p");
@@ -576,7 +592,7 @@ function renderAlbumAdminList() {
 
     actions.append(editButton, moveUpButton, moveDownButton, deleteButton);
 
-    listItem.append(cover, info, actions);
+    listItem.append(media, info, actions);
     albumAdminList.appendChild(listItem);
   });
 }
@@ -588,6 +604,7 @@ function renderEventGallery(selectAlbumId = activeAlbumId) {
     activeAlbumId = null;
     eventGalleryEmpty.classList.remove("hidden");
     eventGalleryAlbum.classList.add("hidden");
+    renderGalleryHighlights();
     return;
   }
 
@@ -624,6 +641,7 @@ function renderEventGallery(selectAlbumId = activeAlbumId) {
   });
 
   displayActiveAlbum();
+  renderGalleryHighlights();
 }
 
 function displayActiveAlbum() {
@@ -667,6 +685,56 @@ function displayActiveAlbum() {
       })
     );
     eventAlbumGrid.appendChild(button);
+  });
+}
+
+function renderGalleryHighlights() {
+  if (!galleryHighlightList) {
+    return;
+  }
+
+  galleryHighlightList.innerHTML = "";
+
+  if (!albumData.length) {
+    const empty = document.createElement("p");
+    empty.className = "gallery__empty";
+    empty.textContent =
+      "Nenhum álbum publicado ainda. Entre na área administrativa para criar um destaque.";
+    galleryHighlightList.appendChild(empty);
+    return;
+  }
+
+  albumData.slice(0, 3).forEach((album) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "gallery-icon-card";
+    button.dataset.albumId = String(album.id);
+
+    const icon = document.createElement("span");
+    icon.className = "gallery-icon-card__icon";
+    icon.textContent = album.icon || DEFAULT_ALBUM_ICON;
+
+    const title = document.createElement("span");
+    title.className = "gallery-icon-card__title";
+    title.textContent = album.title;
+
+    const meta = document.createElement("span");
+    meta.className = "gallery-icon-card__meta";
+    const photoCountLabel =
+      album.photos.length === 1 ? "1 foto" : `${album.photos.length} fotos`;
+    meta.textContent = `${formatFullDate(album.date)} • ${photoCountLabel}`;
+
+    button.setAttribute(
+      "aria-label",
+      `Abrir álbum ${album.title} com ${photoCountLabel}`
+    );
+
+    const cta = document.createElement("span");
+    cta.className = "gallery-icon-card__cta";
+    cta.innerHTML = "Ver detalhes <span aria-hidden='true'>→</span>";
+
+    button.append(icon, title, meta, cta);
+    galleryHighlightList.appendChild(button);
   });
 }
 
@@ -955,11 +1023,13 @@ albumForm.addEventListener("submit", (event) => {
   const title = document.getElementById("albumTitle").value.trim();
   const date = document.getElementById("albumDate").value;
   const description = document.getElementById("albumDescription").value.trim();
+  const icon = albumIconSelect?.value || DEFAULT_ALBUM_ICON;
 
   const payload = {
     title,
     date,
     description,
+    icon,
     photos: [...albumPhotoDraft],
   };
 
@@ -1102,6 +1172,9 @@ albumAdminList.addEventListener("click", (event) => {
     document.getElementById("albumTitle").value = album.title;
     document.getElementById("albumDate").value = album.date;
     document.getElementById("albumDescription").value = album.description;
+    if (albumIconSelect) {
+      albumIconSelect.value = album.icon || DEFAULT_ALBUM_ICON;
+    }
     albumPhotoDraft = [...album.photos];
     albumPhotoInput.value = "";
     updateAlbumPhotoPreview();
@@ -1164,6 +1237,22 @@ eventAlbumList.addEventListener("click", (event) => {
 
   renderEventGallery(albumId);
 });
+
+if (galleryHighlightList) {
+  galleryHighlightList.addEventListener("click", (event) => {
+    const button = event.target.closest(".gallery-icon-card");
+    if (!button) {
+      return;
+    }
+
+    const albumId = Number(button.dataset.albumId);
+    if (Number.isNaN(albumId)) {
+      return;
+    }
+
+    openEventGalleryModal(albumId);
+  });
+}
 
 // Realça seção ativa no menu lateral
 const sidebarLinks = document.querySelectorAll(".sidebar__link");
