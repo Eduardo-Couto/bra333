@@ -201,7 +201,22 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
-.widget-grid {
+.forecast-layout {
+  display: grid;
+  gap: 32px;
+}
+
+.forecast-layout__primary {
+  display: flex;
+}
+
+.forecast-layout__primary .forecast {
+  width: 100%;
+  padding: 28px 32px;
+  gap: 24px;
+}
+
+.forecast-layout__secondary {
   display: grid;
   gap: 24px;
 }
@@ -221,6 +236,14 @@ a {
   .widget-grid > .forecast--widget {
     grid-column: 1 / -1;
   }
+}
+
+.forecast--link {
+  gap: 16px;
+}
+
+.forecast--link .btn {
+  align-self: flex-start;
 }
 
 .card {
@@ -1146,6 +1169,15 @@ a {
     justify-content: center;
   }
 
+  .forecast-layout__primary .forecast {
+    padding: 24px;
+  }
+
+  .forecast__cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .widget-card__frame {
     min-height: 320px;
   }
@@ -1213,6 +1245,18 @@ a {
   .pill-toggle {
     justify-content: space-between;
     width: 100%;
+  }
+
+  .forecast-layout {
+    gap: 24px;
+  }
+
+  .forecast-layout__primary .forecast {
+    padding: 24px 20px;
+  }
+
+  .forecast-layout__secondary {
+    grid-template-columns: 1fr;
   }
 
   .widget-card__frame {

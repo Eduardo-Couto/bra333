@@ -66,101 +66,108 @@
               certa.
             </p>
           </div>
-          <div class="widget-grid">
-            <article
-              class="card forecast forecast--widget"
-              aria-label="Windguru Baía de Guanabara"
-            >
-              <div class="card__header">
-                <div class="card__icon">🌀</div>
-                <div>
-                  <h3>Windguru</h3>
-                  <p class="text--muted">Baía de Guanabara, RJ</p>
-                </div>
-              </div>
-              <p class="text--muted">
-                Dados oficiais do Windguru incorporados para acompanhar as
-                próximas horas de vento com atualização automática.
-              </p>
-              <div class="forecast__widget" aria-live="polite">
-                <div
-                  class="windguru-widget"
-                  id="wg_fwdg_263_68_1760718590738"
-                  role="group"
-                  aria-label="Tabela de previsão Windguru"
-                >
-                  <div class="windguru-widget__placeholder">
-                    Carregando previsão do Windguru…
+          <div class="forecast-layout">
+            <div class="forecast-layout__primary">
+              <article
+                class="card forecast forecast--widget"
+                aria-label="Windguru Baía de Guanabara"
+              >
+                <div class="card__header">
+                  <div class="card__icon">🌀</div>
+                  <div>
+                    <h3>Windguru</h3>
+                    <p class="text--muted">Baía de Guanabara, RJ</p>
                   </div>
                 </div>
-                <noscript>
-                  Ative o JavaScript para visualizar o widget de previsão do
-                  Windguru.
-                </noscript>
-              </div>
-              <div class="forecast__cta">
                 <p class="text--muted">
-                  Precisa de detalhes avançados? Abra o painel completo no
-                  Windguru.
+                  Dados oficiais do Windguru incorporados para acompanhar as
+                  próximas horas de vento com atualização automática.
+                </p>
+                <div class="forecast__widget" aria-live="polite">
+                  <div
+                    class="windguru-widget"
+                    id="wg_fwdg_263_68_1760718590738"
+                    role="group"
+                    aria-label="Tabela de previsão Windguru"
+                  >
+                    <div class="windguru-widget__placeholder">
+                      Carregando previsão do Windguru…
+                    </div>
+                  </div>
+                  <noscript>
+                    Ative o JavaScript para visualizar o widget de previsão do
+                    Windguru.
+                  </noscript>
+                </div>
+                <div class="forecast__cta">
+                  <p class="text--muted">
+                    Precisa de detalhes avançados? Abra o painel completo no
+                    Windguru.
+                  </p>
+                  <a
+                    class="btn btn--primary"
+                    href="https://www.windguru.cz/263"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Abrir painel completo
+                  </a>
+                </div>
+              </article>
+            </div>
+
+            <div class="forecast-layout__secondary" aria-label="Alternativas de previsão">
+              <article
+                class="card forecast forecast--link"
+                aria-label="Muito Bons Ventos Baía de Guanabara"
+              >
+                <div class="card__header">
+                  <div class="card__icon">🌬️</div>
+                  <div>
+                    <h3>Muito Bons Ventos</h3>
+                    <p class="text--muted">Baía de Guanabara, RJ</p>
+                  </div>
+                </div>
+                <p class="text--muted">
+                  Consulte a previsão detalhada, estatísticas históricas e
+                  relatórios do portal Muito Bons Ventos no spot da Baía de
+                  Guanabara.
                 </p>
                 <a
                   class="btn btn--primary"
-                  href="https://www.windguru.cz/263"
+                  href="https://muitobonsventos.com.br/local/baia-de-guanabara-rj"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Abrir painel completo
+                  Abrir Muito Bons Ventos
                 </a>
-              </div>
-            </article>
+              </article>
 
-            <article
-              class="card forecast"
-              aria-label="Muito Bons Ventos Baía de Guanabara"
-            >
-              <div class="card__header">
-                <div class="card__icon">🌬️</div>
-                <div>
-                  <h3>Muito Bons Ventos</h3>
-                  <p class="text--muted">Baía de Guanabara, RJ</p>
-                </div>
-              </div>
-              <p class="text--muted">
-                Consulte a previsão detalhada, estatísticas históricas e
-                relatórios do portal Muito Bons Ventos no spot da Baía de
-                Guanabara.
-              </p>
-              <a
-                class="btn btn--primary"
-                href="https://muitobonsventos.com.br/local/baia-de-guanabara-rj"
-                target="_blank"
-                rel="noreferrer"
+              <article
+                class="card forecast forecast--link"
+                aria-label="Surfconnect Baía de Guanabara"
               >
-                Abrir Muito Bons Ventos
-              </a>
-            </article>
-
-            <article class="card forecast" aria-label="Surfconnect Baía de Guanabara">
-              <div class="card__header">
-                <div class="card__icon">🌊</div>
-                <div>
-                  <h3>Surfconnect</h3>
-                  <p class="text--muted">Câmeras e dados da Baía</p>
+                <div class="card__header">
+                  <div class="card__icon">🌊</div>
+                  <div>
+                    <h3>Surfconnect</h3>
+                    <p class="text--muted">Câmeras e dados da Baía</p>
+                  </div>
                 </div>
-              </div>
-              <p class="text--muted">
-                Acesse as câmeras, relatórios de maré e condições ao vivo pelo
-                Surfconnect para confirmar o cenário antes de sair.
-              </p>
-              <a
-                class="btn btn--primary"
-                href="http://surfconnect.com.br/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Abrir Surfconnect
-              </a>
-            </article>
+                <p class="text--muted">
+                  Acesse as câmeras, relatórios de maré e condições ao vivo pelo
+                  Surfconnect para confirmar o cenário antes de sair.
+                </p>
+                <a
+                  class="btn btn--primary"
+                  href="http://surfconnect.com.br/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Abrir Surfconnect
+                </a>
+              </article>
+            </div>
           </div>
         </section>
 
