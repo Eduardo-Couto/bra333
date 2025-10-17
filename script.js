@@ -157,6 +157,8 @@ const ADMIN_PASSWORD = "flotilha2024";
 const MAX_CLASSIFIED_PHOTOS = 4;
 const MAX_ALBUM_PHOTOS = 12;
 const DEFAULT_ALBUM_ICON = "📸";
+const DEFAULT_ALBUM_COVER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%' stop-color='%230f9bff'/%3E%3Cstop offset='100%' stop-color='%230c68c5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='600' fill='url(%23g)'/%3E%3C/svg%3E";
 
 let isAdmin = false;
 let editingEventIndex = null;
@@ -707,33 +709,53 @@ function renderGalleryHighlights() {
   albumData.slice(0, 3).forEach((album) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "gallery-icon-card";
+    button.className = "gallery-thumb-card";
     button.dataset.albumId = String(album.id);
 
+    const coverImage = album.photos[0] || DEFAULT_ALBUM_COVER;
+
+    const image = document.createElement("img");
+    image.className = "gallery-thumb-card__image";
+    image.src = coverImage;
+    image.alt = `Capa do álbum ${album.title}`;
+
+    const overlay = document.createElement("span");
+    overlay.className = "gallery-thumb-card__overlay";
+
+    const content = document.createElement("span");
+    content.className = "gallery-thumb-card__content";
+
     const icon = document.createElement("span");
-    icon.className = "gallery-icon-card__icon";
+    icon.className = "gallery-thumb-card__icon";
     icon.textContent = album.icon || DEFAULT_ALBUM_ICON;
 
+    const text = document.createElement("span");
+    text.className = "gallery-thumb-card__text";
+
     const title = document.createElement("span");
-    title.className = "gallery-icon-card__title";
+    title.className = "gallery-thumb-card__title";
     title.textContent = album.title;
 
     const meta = document.createElement("span");
-    meta.className = "gallery-icon-card__meta";
+    meta.className = "gallery-thumb-card__meta";
     const photoCountLabel =
       album.photos.length === 1 ? "1 foto" : `${album.photos.length} fotos`;
     meta.textContent = `${formatFullDate(album.date)} • ${photoCountLabel}`;
+
+    text.append(title, meta);
+
+    const cta = document.createElement("span");
+    cta.className = "gallery-thumb-card__cta";
+    cta.innerHTML = "Ver detalhes <span aria-hidden='true'>→</span>";
+
+    content.append(icon, text, cta);
 
     button.setAttribute(
       "aria-label",
       `Abrir álbum ${album.title} com ${photoCountLabel}`
     );
 
-    const cta = document.createElement("span");
-    cta.className = "gallery-icon-card__cta";
-    cta.innerHTML = "Ver detalhes <span aria-hidden='true'>→</span>";
-
-    button.append(icon, title, meta, cta);
+    button.append(image, overlay, content);
     galleryHighlightList.appendChild(button);
   });
 }
@@ -1240,7 +1262,7 @@ eventAlbumList.addEventListener("click", (event) => {
 
 if (galleryHighlightList) {
   galleryHighlightList.addEventListener("click", (event) => {
-    const button = event.target.closest(".gallery-icon-card");
+    const button = event.target.closest(".gallery-thumb-card");
     if (!button) {
       return;
     }
