@@ -6,13 +6,15 @@
   --color-accent-dark: #0870c2;
   --color-text: #1f2933;
   --color-muted: #5f6c7b;
-  --shadow-elevated: 0 18px 40px -20px rgba(15, 155, 255, 0.45),
+  --shadow-elevated:
+    0 18px 40px -20px rgba(15, 155, 255, 0.45),
     0 10px 30px -22px rgba(15, 80, 160, 0.35);
   --radius-lg: 28px;
   --radius-md: 20px;
   --radius-sm: 12px;
-  --font-primary: "Manrope", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  --font-primary:
+    "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 }
 
 * {
@@ -101,7 +103,9 @@ a {
   align-items: center;
   gap: 10px;
   color: rgba(255, 255, 255, 0.82);
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .sidebar__link:hover,
@@ -209,8 +213,8 @@ a {
 @media (min-width: 720px) {
   .widget-grid {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
-    grid-auto-rows: 1fr;
-    align-items: stretch;
+    grid-auto-rows: auto;
+    align-items: start;
     align-content: start;
   }
 
@@ -228,7 +232,9 @@ a {
   gap: 18px;
   border: 1px solid var(--color-border);
   box-shadow: 0 20px 40px -32px rgba(15, 155, 255, 0.6);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .card:hover {
@@ -247,7 +253,11 @@ a {
   height: 48px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, rgba(15, 155, 255, 0.18), rgba(12, 104, 197, 0.12));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 155, 255, 0.18),
+    rgba(12, 104, 197, 0.12)
+  );
   border-radius: 16px;
   font-size: 1.3rem;
 }
@@ -257,7 +267,11 @@ a {
   padding: 18px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(15, 155, 255, 0.18);
-  background: linear-gradient(160deg, rgba(15, 155, 255, 0.08), rgba(12, 104, 197, 0.02));
+  background: linear-gradient(
+    160deg,
+    rgba(15, 155, 255, 0.08),
+    rgba(12, 104, 197, 0.02)
+  );
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
@@ -332,7 +346,11 @@ a {
 }
 
 .calendar__item {
-  background: linear-gradient(120deg, rgba(15, 155, 255, 0.06), rgba(12, 104, 197, 0.04));
+  background: linear-gradient(
+    120deg,
+    rgba(15, 155, 255, 0.06),
+    rgba(12, 104, 197, 0.04)
+  );
   border-radius: var(--radius-md);
   padding: 18px 22px;
   display: flex;
@@ -409,7 +427,9 @@ a {
   border: 1px solid rgba(15, 24, 39, 0.12);
   background: rgba(255, 255, 255, 0.8);
   font: inherit;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .input input:focus,
@@ -427,7 +447,10 @@ a {
   font-weight: 600;
   padding: 12px 20px;
   border-radius: 999px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .btn:focus-visible {
@@ -694,7 +717,9 @@ a {
   font: inherit;
   color: inherit;
   box-shadow: 0 24px 50px -34px rgba(15, 80, 160, 0.55);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .gallery-thumb-card:focus-visible {
@@ -780,7 +805,7 @@ a {
   opacity: 0.85;
 }
 
-.gallery-thumb-card__cta span[aria-hidden='true'] {
+.gallery-thumb-card__cta span[aria-hidden="true"] {
   display: inline-block;
   transition: transform 0.3s ease;
 }
@@ -790,8 +815,10 @@ a {
   opacity: 1;
 }
 
-.gallery-thumb-card:hover .gallery-thumb-card__cta span[aria-hidden='true'],
-.gallery-thumb-card:focus-visible .gallery-thumb-card__cta span[aria-hidden='true'] {
+.gallery-thumb-card:hover .gallery-thumb-card__cta span[aria-hidden="true"],
+.gallery-thumb-card:focus-visible
+  .gallery-thumb-card__cta
+  span[aria-hidden="true"] {
   transform: translateX(4px);
 }
 
@@ -819,7 +846,9 @@ a {
   font-weight: 600;
   color: var(--color-muted);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .pill-toggle__btn.active {
