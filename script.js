@@ -154,6 +154,100 @@ const eventAlbumDescription = document.getElementById("eventAlbumDescription");
 const eventAlbumGrid = document.getElementById("eventAlbumGrid");
 const albumIconSelect = document.getElementById("albumIcon");
 
+const modalReturnFocus = new WeakMap();
+const modalFocusHandlers = new WeakMap();
+
+function getFocusableElements(container) {
+  if (!container) {
+    return [];
+  }
+
+  return Array.from(
+    container.querySelectorAll(
+      "a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex='-1'])"
+    )
+  ).filter((element) => element.offsetParent !== null);
+}
+
+function openModal(modal, focusElement) {
+  if (!modal) {
+    return;
+  }
+
+  modalReturnFocus.set(
+    modal,
+    document.activeElement instanceof HTMLElement ? document.activeElement : null
+  );
+
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  const focusable = getFocusableElements(modal);
+  const target = focusElement || focusable[0] || null;
+  if (target) {
+    target.focus();
+  }
+
+  if (focusable.length > 0 && !modalFocusHandlers.has(modal)) {
+    const handleKeyDown = (event) => {
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const visibleFocusable = getFocusableElements(modal);
+      if (visibleFocusable.length === 0) {
+        return;
+      }
+
+      const first = visibleFocusable[0];
+      const last = visibleFocusable[visibleFocusable.length - 1];
+
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    modalFocusHandlers.set(modal, handleKeyDown);
+    modal.addEventListener("keydown", handleKeyDown);
+  }
+}
+
+function closeModal(modal) {
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+
+  const handleKeyDown = modalFocusHandlers.get(modal);
+  if (handleKeyDown) {
+    modal.removeEventListener("keydown", handleKeyDown);
+    modalFocusHandlers.delete(modal);
+  }
+
+  const returnFocus = modalReturnFocus.get(modal);
+  if (returnFocus) {
+    returnFocus.focus();
+  }
+  modalReturnFocus.delete(modal);
+
+  if (!document.querySelector(".modal:not(.hidden)")) {
+    document.body.classList.remove("modal-open");
+  }
+}
+
+function cloneArray(items) {
+  return Array.isArray(items) ? [...items] : [];
+}
+
 const ADMIN_PASSWORD = "flotilha2024";
 const MAX_CLASSIFIED_PHOTOS = 4;
 const MAX_ALBUM_PHOTOS = 12;

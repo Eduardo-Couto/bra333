@@ -32,6 +32,10 @@ body {
   color: var(--color-text);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 img {
   max-width: 100%;
   display: block;
