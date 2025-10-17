@@ -79,26 +79,39 @@
                 </div>
               </div>
               <p class="text--muted">
-                Widget oficial configurado para a Baía de Guanabara direto do
-                Windguru. Use o botão abaixo para abrir o painel completo no
-                site.
+                Dados oficiais do Windguru incorporados para acompanhar as
+                próximas horas de vento com atualização automática.
               </p>
-              <div class="widget-card__frame">
-                <iframe
-                  title="Previsão Windguru para Baía de Guanabara"
-                  src="https://www.windguru.cz/widget.php?wg=3&spot=263&lng=pt"
-                  loading="lazy"
-                  referrerpolicy="no-referrer"
-                ></iframe>
+              <div class="forecast__widget" aria-live="polite">
+                <div
+                  class="windguru-widget"
+                  id="wg_fwdg_263_68_1760718590738"
+                  role="group"
+                  aria-label="Tabela de previsão Windguru"
+                >
+                  <div class="windguru-widget__placeholder">
+                    Carregando previsão do Windguru…
+                  </div>
+                </div>
+                <noscript>
+                  Ative o JavaScript para visualizar o widget de previsão do
+                  Windguru.
+                </noscript>
               </div>
-              <a
-                class="btn btn--primary"
-                href="https://www.windguru.cz/263"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Abrir painel Windguru
-              </a>
+              <div class="forecast__cta">
+                <p class="text--muted">
+                  Precisa de detalhes avançados? Abra o painel completo no
+                  Windguru.
+                </p>
+                <a
+                  class="btn btn--primary"
+                  href="https://www.windguru.cz/263"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Abrir painel completo
+                </a>
+              </div>
             </article>
 
             <article
@@ -549,6 +562,37 @@
       </div>
     </div>
 
+    <script id="wg_fwdg_263_68_1760718590738">
+      (function (window, document) {
+        var loader = function () {
+          var arg = [
+            "s=263",
+            "m=68",
+            "uid=wg_fwdg_263_68_1760718590738",
+            "wj=knots",
+            "tj=c",
+            "waj=m",
+            "tij=cm",
+            "odh=0",
+            "doh=24",
+            "fhours=240",
+            "hrsm=2",
+            "vt=forecasts",
+            "lng=pt",
+            "p=WINDSPD,GUST,MWINDSPD,SMER,TMPE,FLHGT,CDC,APCP1s,RATING",
+          ];
+          var script = document.createElement("script");
+          var tag = document.getElementsByTagName("script")[0];
+          script.src = "https://www.windguru.cz/js/widget.php?" + arg.join("&");
+          tag.parentNode.insertBefore(script, tag);
+        };
+        if (window.addEventListener) {
+          window.addEventListener("load", loader, false);
+        } else if (window.attachEvent) {
+          window.attachEvent("onload", loader);
+        }
+      })(window, document);
+    </script>
     <script src="script.js" type="module"></script>
   </body>
 </html>
