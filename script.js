@@ -27,7 +27,7 @@ const classifiedData = [
     title: "Wing Duotone Unit 2023 5m",
     seller: "Ana Prado",
     condition: "seminovo",
-    price: "R$ 5.400",
+    price: "R$\u00a05.400,00",
     description:
       "Lona impecável, usado em 6 sessões. Inclui leash original e bolsa rígida.",
     photos: [
@@ -40,7 +40,7 @@ const classifiedData = [
     title: "Foil Axis ART 899 completo",
     seller: "Lucas Ribeiro",
     condition: "usado",
-    price: "R$ 9.200",
+    price: "R$\u00a09.200,00",
     description:
       "Mastro 86cm + fuselagem ultra curta. Ideal para regatas de upwind/downwind.",
     photos: [
@@ -52,7 +52,7 @@ const classifiedData = [
     title: "Prancha custom 95L carbono",
     seller: "Marina Costa",
     condition: "novo",
-    price: "R$ 11.800",
+    price: "R$\u00a011.800,00",
     description:
       "Shape assinado por shaper local. Deck em EVA memory foam, trilhos reforçados.",
     photos: [
@@ -104,6 +104,7 @@ const filterLevel = document.getElementById("filterLevel");
 const classifiedList = document.getElementById("classifiedList");
 const classifiedTemplate = document.getElementById("classifiedCardTemplate");
 const classifiedSearch = document.getElementById("classifiedSearch");
+const classifiedPriceInput = document.getElementById("classifiedPrice");
 const conditionButtons = Array.from(
   document.querySelectorAll(".pill-toggle__btn")
 );
@@ -172,48 +173,13 @@ let currentPhotoTitle = "";
 let currentPhotoSubtitle = "";
 let currentPhotoIndex = 0;
 
-let lastFocus = null;
-function trapFocus(modal) {
-  const selectors = [
-    "a[href]",
-    "button:not([disabled])",
-    "input",
-    "select",
-    "textarea",
-    "[tabindex]:not([tabindex='-1'])",
-  ];
-  const nodes = modal.querySelectorAll(selectors.join(","));
-  const first = nodes[0];
-  const last = nodes[nodes.length - 1];
-  function onKey(e) {
-    if (e.key !== "Tab") return;
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
-  modal.addEventListener("keydown", onKey);
-  return () => modal.removeEventListener("keydown", onKey);
-}
-
-let releaseTrap = null;
-function openModal(modal, focusEl) {
-  lastFocus = document.activeElement;
-  modal.classList.remove("hidden");
-  if (releaseTrap) releaseTrap();
-  releaseTrap = trapFocus(modal);
-  (focusEl || modal.querySelector("[autofocus]") || modal).focus();
-}
-function closeModal(modal) {
-  modal.classList.add("hidden");
-  if (releaseTrap) {
-    releaseTrap();
-    releaseTrap = null;
-  }
-  if (lastFocus) lastFocus.focus();
+function formatCurrencyValue(value) {
+  const digits = String(value ?? "").replace(/[^\d]/g, "");
+  const amount = (parseInt(digits || "0", 10) / 100).toFixed(2);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(Number(amount));
 }
 
 function openAdminModal() {
@@ -924,6 +890,12 @@ filterType.addEventListener("change", renderEvents);
 filterLevel.addEventListener("change", renderEvents);
 classifiedSearch.addEventListener("input", renderClassifieds);
 
+if (classifiedPriceInput) {
+  classifiedPriceInput.addEventListener("input", () => {
+    classifiedPriceInput.value = formatCurrencyValue(classifiedPriceInput.value);
+  });
+}
+
 classifiedPhotoInput.addEventListener("change", handleClassifiedPhotoSelection);
 albumPhotoInput.addEventListener("change", handleAlbumPhotoSelection);
 
@@ -1069,7 +1041,7 @@ classifiedForm.addEventListener("submit", (event) => {
 
   const title = document.getElementById("classifiedTitle").value.trim();
   const seller = document.getElementById("classifiedSeller").value.trim();
-  const price = document.getElementById("classifiedPrice").value.trim();
+  const priceValue = classifiedPriceInput?.value.trim() ?? "";
   const condition = document.getElementById("classifiedCondition").value;
   const description = document
     .getElementById("classifiedDescription")
@@ -1079,10 +1051,15 @@ classifiedForm.addEventListener("submit", (event) => {
     return;
   }
 
+  const formattedPrice = formatCurrencyValue(priceValue);
+  if (classifiedPriceInput) {
+    classifiedPriceInput.value = formattedPrice;
+  }
+
   const payload = {
     title,
     seller,
-    price,
+    price: formattedPrice,
     condition,
     description,
     photos: cloneArray(classifiedPhotoDraft),
@@ -1216,7 +1193,9 @@ classifiedList.addEventListener("click", (event) => {
     const item = classifiedData[index];
     document.getElementById("classifiedTitle").value = item.title;
     document.getElementById("classifiedSeller").value = item.seller;
-    document.getElementById("classifiedPrice").value = item.price;
+    if (classifiedPriceInput) {
+      classifiedPriceInput.value = formatCurrencyValue(item.price);
+    }
     document.getElementById("classifiedCondition").value = item.condition;
     document.getElementById("classifiedDescription").value = item.description;
     classifiedPhotoDraft = cloneArray(item.photos);
