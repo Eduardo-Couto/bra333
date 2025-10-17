@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flotilha Wingfoil - Hub Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand__icon">⛵️</div>
+          <div>
+            <p class="brand__title">Flotilha Wingfoil</p>
+            <p class="brand__subtitle">Painel do Membro</p>
+          </div>
+        </div>
+        <nav class="sidebar__nav">
+          <a href="#dashboard" class="sidebar__link active">Visão geral</a>
+          <a href="#previsao" class="sidebar__link">Previsão</a>
+          <a href="#calendario" class="sidebar__link">Agenda</a>
+          <a href="#galeria" class="sidebar__link">Galeria</a>
+          <a href="#classificados" class="sidebar__link">Classificados</a>
+        </nav>
+        <div class="sidebar__footer">
+          <button class="btn btn--outline" id="toggleAdminBtn">
+            Área do administrador
+          </button>
+        </div>
+      </aside>
+
+      <main class="content" id="dashboard">
+        <header class="content__header">
+          <div>
+            <h1>Bem-vindo à flotilha</h1>
+            <p class="text--muted">
+              Acompanhe previsões, condições do mar, agenda de treinos e
+              materiais exclusivos dos membros.
+            </p>
+          </div>
+          <div class="profile-card">
+            <div>
+              <p class="profile-card__name">Marina Costa</p>
+              <p class="profile-card__role">Rider Avançada</p>
+            </div>
+            <img
+              class="profile-card__avatar"
+              src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=facearea&w=80&h=80&q=80"
+              alt="Avatar da atleta"
+            />
+          </div>
+        </header>
+
+        <section class="panel" id="previsao">
+          <div class="panel__header">
+            <h2>Previsão do vento</h2>
+            <p class="text--muted">
+              Dados ao vivo de Windguru e Muito Bons Ventos para tomar a decisão
+              certa.
+            </p>
+          </div>
+          <div class="grid grid--three">
+            <article class="card forecast" aria-label="Resumo Windguru">
+              <div class="card__header">
+                <div class="card__icon">🌀</div>
+                <div>
+                  <h3>Windguru</h3>
+                  <p class="text--muted">São Miguel do Gostoso</p>
+                </div>
+              </div>
+              <dl class="forecast__metrics">
+                <div>
+                  <dt>Rajadas</dt>
+                  <dd><span class="metric">28</span> nós</dd>
+                </div>
+                <div>
+                  <dt>Direção</dt>
+                  <dd>NE 45°</dd>
+                </div>
+                <div>
+                  <dt>Janela</dt>
+                  <dd>14:00 - 17:30</dd>
+                </div>
+              </dl>
+              <a
+                class="btn btn--primary"
+                href="https://www.windguru.cz"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Abrir painel Windguru
+              </a>
+            </article>
+
+            <article class="card forecast" aria-label="Resumo Muito Bons Ventos">
+              <div class="card__header">
+                <div class="card__icon">🌬️</div>
+                <div>
+                  <h3>Muito Bons Ventos</h3>
+                  <p class="text--muted">Praia de Iracema</p>
+                </div>
+              </div>
+              <dl class="forecast__metrics">
+                <div>
+                  <dt>Média</dt>
+                  <dd><span class="metric">21</span> nós</dd>
+                </div>
+                <div>
+                  <dt>Direção</dt>
+                  <dd>E 70°</dd>
+                </div>
+                <div>
+                  <dt>Tendência</dt>
+                  <dd>Subindo +3 nós</dd>
+                </div>
+              </dl>
+              <a
+                class="btn btn--primary"
+                href="https://muitobonsventos.com.br"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ver Muito Bons Ventos
+              </a>
+            </article>
+
+            <article class="card cameras" aria-label="Câmeras ao vivo">
+              <div class="card__header">
+                <div class="card__icon">🎥</div>
+                <div>
+                  <h3>SurfConnect</h3>
+                  <p class="text--muted">Câmeras da praia</p>
+                </div>
+              </div>
+              <p>
+                Veja em tempo real as condições do mar, arrebentação e fluxo de
+                riders direto das câmeras SurfConnect.
+              </p>
+              <div class="camera-links">
+                <a
+                  class="chip"
+                  href="https://www.surfconnect.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Ponta Negra</a
+                >
+                <a
+                  class="chip"
+                  href="https://www.surfconnect.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Praia Mole</a
+                >
+                <a
+                  class="chip"
+                  href="https://www.surfconnect.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Cumbuco</a
+                >
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="calendario">
+          <div class="panel__header">
+            <h2>Agenda de regatas e treinos</h2>
+            <p class="text--muted">
+              Controle colaborativo atualizado pelo administrador da flotilha.
+            </p>
+          </div>
+
+          <div class="calendar">
+            <div class="calendar__filters">
+              <label class="input">
+                <span class="input__label">Filtrar por tipo</span>
+                <select id="filterType">
+                  <option value="all">Todos</option>
+                  <option value="regata">Regatas</option>
+                  <option value="treino">Treinos</option>
+                  <option value="clinica">Clínicas</option>
+                </select>
+              </label>
+              <label class="input">
+                <span class="input__label">Filtrar por nível</span>
+                <select id="filterLevel">
+                  <option value="all">Todos</option>
+                  <option value="iniciante">Iniciante</option>
+                  <option value="intermediario">Intermediário</option>
+                  <option value="avancado">Avançado</option>
+                </select>
+              </label>
+            </div>
+
+            <ul class="calendar__list" id="eventList" aria-live="polite"></ul>
+
+            <form class="admin-form hidden" id="eventForm" novalidate>
+              <h3>Adicionar novo evento</h3>
+              <div class="form-grid">
+                <label class="input">
+                  <span class="input__label">Título</span>
+                  <input type="text" id="eventTitle" required />
+                </label>
+                <label class="input">
+                  <span class="input__label">Data</span>
+                  <input type="date" id="eventDate" required />
+                </label>
+                <label class="input">
+                  <span class="input__label">Tipo</span>
+                  <select id="eventType" required>
+                    <option value="regata">Regata</option>
+                    <option value="treino">Treino</option>
+                    <option value="clinica">Clínica</option>
+                  </select>
+                </label>
+                <label class="input">
+                  <span class="input__label">Nível</span>
+                  <select id="eventLevel" required>
+                    <option value="iniciante">Iniciante</option>
+                    <option value="intermediario">Intermediário</option>
+                    <option value="avancado">Avançado</option>
+                  </select>
+                </label>
+              </div>
+              <label class="input">
+                <span class="input__label">Descrição</span>
+                <textarea id="eventDescription" rows="3" required></textarea>
+              </label>
+              <button type="submit" class="btn btn--primary">
+                Salvar evento
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel" id="galeria">
+          <div class="panel__header">
+            <h2>Memórias dos treinos</h2>
+            <p class="text--muted">
+              Registre seus highlights e inspire os próximos desafios.
+            </p>
+          </div>
+          <div class="gallery">
+            <figure class="gallery__item">
+              <img
+                src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=600&q=80"
+                alt="Wingfoil em manobra sobre água cristalina"
+              />
+              <figcaption>Downwind do nascer do sol - Equipe avançada</figcaption>
+            </figure>
+            <figure class="gallery__item">
+              <img
+                src="https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?auto=format&fit=crop&w=600&q=80"
+                alt="Atleta preparando equipamento de wingfoil na areia"
+              />
+              <figcaption>Clinica de setup - Preparando o quiver</figcaption>
+            </figure>
+            <figure class="gallery__item">
+              <img
+                src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=80"
+                alt="Grupo comemorando na praia com pranchas"
+              />
+              <figcaption>Regata interna - Pódio colaborativo</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="panel" id="classificados">
+          <div class="panel__header">
+            <h2>Classificados dos membros</h2>
+            <p class="text--muted">
+              Garanta upgrades e negocie equipamentos direto com a flotilha.
+            </p>
+          </div>
+
+          <div class="classifieds__header">
+            <label class="input">
+              <span class="input__label">Pesquisar material</span>
+              <input type="search" id="classifiedSearch" placeholder="Ex: wing 5m" />
+            </label>
+            <div class="pill-toggle" role="group" aria-label="Filtro por condição">
+              <button class="pill-toggle__btn active" data-condition="all">
+                Todos
+              </button>
+              <button class="pill-toggle__btn" data-condition="novo">
+                Novo
+              </button>
+              <button class="pill-toggle__btn" data-condition="seminovo">
+                Seminovo
+              </button>
+              <button class="pill-toggle__btn" data-condition="usado">
+                Usado
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid--three" id="classifiedList"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="eventItemTemplate">
+      <li class="calendar__item">
+        <div>
+          <p class="calendar__date"></p>
+          <h3 class="calendar__title"></h3>
+          <p class="calendar__description"></p>
+        </div>
+        <div class="calendar__meta">
+          <span class="badge badge--type"></span>
+          <span class="badge badge--level"></span>
+        </div>
+      </li>
+    </template>
+
+    <template id="classifiedCardTemplate">
+      <article class="card classified">
+        <div class="card__header">
+          <div class="card__icon">🏄‍♂️</div>
+          <div>
+            <h3 class="classified__title"></h3>
+            <p class="text--muted classified__seller"></p>
+          </div>
+        </div>
+        <p class="classified__description"></p>
+        <div class="classified__footer">
+          <span class="badge badge--condition"></span>
+          <span class="classified__price"></span>
+        </div>
+      </article>
+    </template>
+
+    <script src="script.js" type="module"></script>
+  </body>
+</html>
