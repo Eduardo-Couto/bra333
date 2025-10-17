@@ -591,10 +591,22 @@
           script.src = "https://www.windguru.cz/js/widget.php?" + arg.join("&");
           tag.parentNode.insertBefore(script, tag);
         };
+        var scheduleLoader = function () {
+          if ("requestIdleCallback" in window) {
+            requestIdleCallback(function () {
+              loader();
+            });
+          } else {
+            setTimeout(loader, 0);
+          }
+        };
+
         if (window.addEventListener) {
-          window.addEventListener("load", loader, false);
+          window.addEventListener("load", scheduleLoader, false);
         } else if (window.attachEvent) {
-          window.attachEvent("onload", loader);
+          window.attachEvent("onload", scheduleLoader);
+        } else {
+          scheduleLoader();
         }
       })(window, document);
     </script>
