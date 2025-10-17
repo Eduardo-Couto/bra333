@@ -30,6 +30,11 @@ const classifiedData = [
     price: "R$ 5.400",
     description:
       "Lona impecável, usado em 6 sessões. Inclui leash original e bolsa rígida.",
+    photos: [
+      "https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1528155124525-03a952c17e79?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1516357231954-91487b459602?auto=format&fit=crop&w=900&q=80",
+    ],
   },
   {
     title: "Foil Axis ART 899 completo",
@@ -38,6 +43,10 @@ const classifiedData = [
     price: "R$ 9.200",
     description:
       "Mastro 86cm + fuselagem ultra curta. Ideal para regatas de upwind/downwind.",
+    photos: [
+      "https://images.unsplash.com/photo-1528747045269-390fe33c19d4?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1530885167139-40c78f746b0c?auto=format&fit=crop&w=900&q=80",
+    ],
   },
   {
     title: "Prancha custom 95L carbono",
@@ -46,8 +55,44 @@ const classifiedData = [
     price: "R$ 11.800",
     description:
       "Shape assinado por shaper local. Deck em EVA memory foam, trilhos reforçados.",
+    photos: [
+      "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1513352592664-3ad1a0f2ab95?auto=format&fit=crop&w=900&q=80",
+    ],
   },
 ];
+
+const albumData = [
+  {
+    id: 1,
+    title: "Regata Estadual - Praia Vermelha",
+    date: "2024-07-06",
+    description:
+      "Dia clássico de sudoeste constante. Largadas cronometradas e chegada diante do Pão de Açúcar.",
+    photos: [
+      "https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?auto=format&fit=crop&w=1100&q=80",
+      "https://images.unsplash.com/photo-1510662145379-0a3f4e49f06e?auto=format&fit=crop&w=1100&q=80",
+      "https://images.unsplash.com/photo-1496865531661-4f2279f0e7c7?auto=format&fit=crop&w=1100&q=80",
+      "https://images.unsplash.com/photo-1506795213374-5f18b0d437ef?auto=format&fit=crop&w=1100&q=80",
+    ],
+  },
+  {
+    id: 2,
+    title: "Treino tático pré-regata",
+    date: "2024-06-22",
+    description:
+      "Marcamos posições de marcação e simulamos situações de boia com troca de role entre os atletas.",
+    photos: [
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1100&q=80",
+      "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=1100&q=80",
+      "https://images.unsplash.com/photo-1431440869543-efaf3388c585?auto=format&fit=crop&w=1100&q=80",
+    ],
+  },
+];
+
+let albumIdCounter = albumData.length;
 
 const eventList = document.getElementById("eventList");
 const eventTemplate = document.getElementById("eventItemTemplate");
@@ -60,15 +105,20 @@ const classifiedSearch = document.getElementById("classifiedSearch");
 const conditionButtons = Array.from(
   document.querySelectorAll(".pill-toggle__btn")
 );
+const classifiedPhotoInput = document.getElementById("classifiedPhotos");
+const classifiedPhotoPreview = document.getElementById("classifiedPhotoPreview");
 
 const adminButton = document.getElementById("toggleAdminBtn");
 const adminForm = document.getElementById("eventForm");
 const classifiedForm = document.getElementById("classifiedForm");
+const albumForm = document.getElementById("albumForm");
 
 const eventSubmitBtn = document.getElementById("eventSubmitBtn");
 const eventCancelBtn = document.getElementById("eventCancelBtn");
 const classifiedSubmitBtn = document.getElementById("classifiedSubmitBtn");
 const classifiedCancelBtn = document.getElementById("classifiedCancelBtn");
+const albumSubmitBtn = document.getElementById("albumSubmitBtn");
+const albumCancelBtn = document.getElementById("albumCancelBtn");
 
 const adminLoginModal = document.getElementById("adminLoginModal");
 const adminLoginForm = document.getElementById("adminLoginForm");
@@ -76,11 +126,44 @@ const adminPasswordInput = document.getElementById("adminPassword");
 const adminLoginError = document.getElementById("adminLoginError");
 const adminLoginClose = document.getElementById("adminLoginClose");
 
+const albumPhotoInput = document.getElementById("albumPhotos");
+const albumPhotoPreview = document.getElementById("albumPhotoPreview");
+const albumAdminPanel = document.getElementById("albumAdminPanel");
+const albumAdminList = document.getElementById("albumAdminList");
+const openAlbumModalBtn = document.getElementById("openAlbumModal");
+
+const photoViewerModal = document.getElementById("photoViewerModal");
+const photoViewerClose = document.getElementById("photoViewerClose");
+const photoViewerImage = document.getElementById("photoViewerImage");
+const photoViewerTitle = document.getElementById("photoViewerTitle");
+const photoViewerSubtitle = document.getElementById("photoViewerSubtitle");
+const photoViewerThumbs = document.getElementById("photoViewerThumbs");
+
+const eventGalleryModal = document.getElementById("eventGalleryModal");
+const eventGalleryClose = document.getElementById("eventGalleryClose");
+const eventAlbumList = document.getElementById("eventAlbumList");
+const eventGalleryEmpty = document.getElementById("eventGalleryEmpty");
+const eventGalleryAlbum = document.getElementById("eventGalleryAlbum");
+const eventAlbumTitle = document.getElementById("eventAlbumTitle");
+const eventAlbumMeta = document.getElementById("eventAlbumMeta");
+const eventAlbumDescription = document.getElementById("eventAlbumDescription");
+const eventAlbumGrid = document.getElementById("eventAlbumGrid");
+
 const ADMIN_PASSWORD = "flotilha2024";
+const MAX_CLASSIFIED_PHOTOS = 4;
+const MAX_ALBUM_PHOTOS = 12;
 
 let isAdmin = false;
 let editingEventIndex = null;
 let editingClassifiedIndex = null;
+let editingAlbumId = null;
+let classifiedPhotoDraft = [];
+let albumPhotoDraft = [];
+let activeAlbumId = albumData[0]?.id ?? null;
+let currentPhotoSet = [];
+let currentPhotoTitle = "";
+let currentPhotoSubtitle = "";
+let currentPhotoIndex = 0;
 
 function openAdminModal() {
   adminLoginModal.classList.remove("hidden");
@@ -106,27 +189,182 @@ function resetClassifiedForm() {
   editingClassifiedIndex = null;
   classifiedSubmitBtn.textContent = "Salvar anúncio";
   classifiedCancelBtn.classList.add("hidden");
+  classifiedPhotoDraft = [];
+  classifiedPhotoInput.value = "";
+  updateClassifiedPhotoPreview();
+}
+
+function resetAlbumForm() {
+  albumForm.reset();
+  editingAlbumId = null;
+  albumSubmitBtn.textContent = "Publicar álbum";
+  albumCancelBtn.classList.add("hidden");
+  albumPhotoDraft = [];
+  albumPhotoInput.value = "";
+  updateAlbumPhotoPreview();
+}
+
+function renderPhotoPreview(container, photos, { removeHandler, emptyMessage, altPrefix }) {
+  container.innerHTML = "";
+
+  if (!photos.length) {
+    const empty = document.createElement("p");
+    empty.className = "photo-preview__empty";
+    empty.textContent = emptyMessage;
+    container.appendChild(empty);
+    return;
+  }
+
+  photos.forEach((photo, index) => {
+    const item = document.createElement("div");
+    item.className = "photo-preview__item";
+
+    const image = document.createElement("img");
+    image.src = photo;
+    image.alt = `${altPrefix} ${index + 1}`;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "photo-preview__remove";
+    removeButton.setAttribute("aria-label", "Remover foto");
+    removeButton.textContent = "×";
+    removeButton.addEventListener("click", () => removeHandler(index));
+
+    item.append(image, removeButton);
+    container.appendChild(item);
+  });
+}
+
+function updateClassifiedPhotoPreview() {
+  renderPhotoPreview(classifiedPhotoPreview, classifiedPhotoDraft, {
+    removeHandler: (index) => {
+      classifiedPhotoDraft.splice(index, 1);
+      updateClassifiedPhotoPreview();
+    },
+    emptyMessage: "Nenhuma foto anexada ao anúncio ainda.",
+    altPrefix: "Foto do anúncio",
+  });
+}
+
+function updateAlbumPhotoPreview() {
+  renderPhotoPreview(albumPhotoPreview, albumPhotoDraft, {
+    removeHandler: (index) => {
+      albumPhotoDraft.splice(index, 1);
+      updateAlbumPhotoPreview();
+    },
+    emptyMessage: "Nenhuma foto adicionada ao álbum ainda.",
+    altPrefix: "Foto do álbum",
+  });
+}
+
+function getConditionLabel(condition) {
+  const labels = {
+    novo: "Novo",
+    seminovo: "Seminovo",
+    usado: "Usado",
+  };
+
+  return labels[condition] || condition;
+}
+
+function setPhotoViewerImage(index) {
+  if (!currentPhotoSet[index]) {
+    return;
+  }
+
+  currentPhotoIndex = index;
+  photoViewerImage.src = currentPhotoSet[index];
+  photoViewerImage.alt = `${currentPhotoTitle} - foto ${index + 1}`;
+
+  const thumbs = Array.from(
+    photoViewerThumbs.querySelectorAll(".photo-viewer__thumb")
+  );
+  thumbs.forEach((thumb, thumbIndex) => {
+    thumb.classList.toggle("photo-viewer__thumb--active", thumbIndex === index);
+  });
+}
+
+function openPhotoViewer({ photos, title, subtitle = "", startIndex = 0 }) {
+  if (!Array.isArray(photos) || photos.length === 0) {
+    return;
+  }
+
+  currentPhotoSet = photos;
+  currentPhotoTitle = title;
+  currentPhotoSubtitle = subtitle;
+  photoViewerTitle.textContent = title;
+  photoViewerSubtitle.textContent = subtitle;
+  photoViewerSubtitle.classList.toggle("hidden", subtitle.length === 0);
+  photoViewerThumbs.innerHTML = "";
+
+  photos.forEach((photo, index) => {
+    const thumbButton = document.createElement("button");
+    thumbButton.type = "button";
+    thumbButton.className = "photo-viewer__thumb";
+    thumbButton.setAttribute(
+      "aria-label",
+      `Visualizar foto ${index + 1} de ${title}`
+    );
+    const thumbImage = document.createElement("img");
+    thumbImage.src = photo;
+    thumbImage.alt = `${title} - miniatura ${index + 1}`;
+    thumbButton.appendChild(thumbImage);
+    thumbButton.addEventListener("click", () => setPhotoViewerImage(index));
+    photoViewerThumbs.appendChild(thumbButton);
+  });
+
+  setPhotoViewerImage(Math.min(startIndex, photos.length - 1));
+  photoViewerModal.classList.remove("hidden");
+}
+
+function closePhotoViewer() {
+  photoViewerModal.classList.add("hidden");
+  currentPhotoSet = [];
+  currentPhotoTitle = "";
+  currentPhotoSubtitle = "";
+  photoViewerTitle.textContent = "";
+  photoViewerSubtitle.textContent = "";
+  photoViewerSubtitle.classList.remove("hidden");
+  photoViewerImage.src = "";
+  photoViewerImage.alt = "";
+  photoViewerThumbs.innerHTML = "";
+}
+
+function openEventGalleryModal() {
+  renderEventGallery(activeAlbumId);
+  eventGalleryModal.classList.remove("hidden");
+}
+
+function closeEventGalleryModal() {
+  eventGalleryModal.classList.add("hidden");
 }
 
 function updateAdminUI() {
   if (isAdmin) {
     adminForm.classList.remove("hidden");
     classifiedForm.classList.remove("hidden");
+    albumForm.classList.remove("hidden");
+    albumAdminPanel.classList.remove("hidden");
     adminButton.classList.remove("btn--outline");
     adminButton.classList.add("btn--primary");
     adminButton.textContent = "Sair da área do administrador";
   } else {
     adminForm.classList.add("hidden");
     classifiedForm.classList.add("hidden");
+    albumForm.classList.add("hidden");
+    albumAdminPanel.classList.add("hidden");
     adminButton.classList.add("btn--outline");
     adminButton.classList.remove("btn--primary");
     adminButton.textContent = "Área do administrador";
     resetEventForm();
     resetClassifiedForm();
+    resetAlbumForm();
   }
 
   renderEvents();
   renderClassifieds();
+  renderAlbumAdminList();
+  renderEventGallery();
 }
 
 function formatDate(dateString) {
@@ -134,6 +372,15 @@ function formatDate(dateString) {
   return date.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
+  });
+}
+
+function formatFullDate(dateString) {
+  const date = new Date(dateString + "T00:00:00");
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
 }
 
@@ -235,13 +482,21 @@ function renderClassifieds() {
     clone.querySelector(".classified__description").textContent = item.description;
     clone.querySelector(".classified__price").textContent = item.price;
 
+    const mediaBlock = clone.querySelector(".classified__media");
+    const photoButton = clone.querySelector(".classified__photos-btn");
+    if (item.photos && item.photos.length) {
+      const photosCountLabel =
+        item.photos.length === 1
+          ? "Ver 1 foto do anúncio"
+          : `Ver ${item.photos.length} fotos do anúncio`;
+      photoButton.textContent = photosCountLabel;
+      mediaBlock.classList.remove("hidden");
+    } else {
+      mediaBlock.classList.add("hidden");
+    }
+
     const conditionBadge = clone.querySelector(".badge--condition");
-    const conditionLabels = {
-      novo: "Novo",
-      seminovo: "Seminovo",
-      usado: "Usado",
-    };
-    conditionBadge.textContent = conditionLabels[item.condition] || item.condition;
+    conditionBadge.textContent = getConditionLabel(item.condition);
 
     const actions = clone.querySelector(".admin-actions");
     if (isAdmin) {
@@ -254,9 +509,257 @@ function renderClassifieds() {
   });
 }
 
+function renderAlbumAdminList() {
+  albumAdminList.innerHTML = "";
+
+  if (!albumData.length) {
+    const emptyItem = document.createElement("li");
+    emptyItem.className = "album-admin__empty";
+    emptyItem.textContent = "Nenhum álbum cadastrado até o momento.";
+    albumAdminList.appendChild(emptyItem);
+    return;
+  }
+
+  albumData.forEach((album, index) => {
+    const listItem = document.createElement("li");
+    listItem.className = "album-admin__item";
+    listItem.dataset.albumId = String(album.id);
+
+    const cover = document.createElement("img");
+    cover.className = "album-admin__cover";
+    cover.src = album.photos[0];
+    cover.alt = `Capa do álbum ${album.title}`;
+
+    const info = document.createElement("div");
+    const title = document.createElement("p");
+    title.className = "album-admin__title";
+    title.textContent = album.title;
+
+    const meta = document.createElement("p");
+    meta.className = "text--muted";
+    const photoCountLabel =
+      album.photos.length === 1
+        ? "1 foto"
+        : `${album.photos.length} fotos`;
+    meta.textContent = `${formatFullDate(album.date)} · ${photoCountLabel}`;
+
+    info.append(title, meta);
+
+    const actions = document.createElement("div");
+    actions.className = "album-admin__actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "btn btn--ghost";
+    editButton.dataset.action = "edit";
+    editButton.textContent = "Editar";
+
+    const moveUpButton = document.createElement("button");
+    moveUpButton.type = "button";
+    moveUpButton.className = "btn btn--ghost";
+    moveUpButton.dataset.action = "move-up";
+    moveUpButton.textContent = "Mover ↑";
+    moveUpButton.disabled = index === 0;
+
+    const moveDownButton = document.createElement("button");
+    moveDownButton.type = "button";
+    moveDownButton.className = "btn btn--ghost";
+    moveDownButton.dataset.action = "move-down";
+    moveDownButton.textContent = "Mover ↓";
+    moveDownButton.disabled = index === albumData.length - 1;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "btn btn--ghost btn--danger";
+    deleteButton.dataset.action = "delete";
+    deleteButton.textContent = "Excluir";
+
+    actions.append(editButton, moveUpButton, moveDownButton, deleteButton);
+
+    listItem.append(cover, info, actions);
+    albumAdminList.appendChild(listItem);
+  });
+}
+
+function renderEventGallery(selectAlbumId = activeAlbumId) {
+  eventAlbumList.innerHTML = "";
+
+  if (!albumData.length) {
+    activeAlbumId = null;
+    eventGalleryEmpty.classList.remove("hidden");
+    eventGalleryAlbum.classList.add("hidden");
+    return;
+  }
+
+  if (!selectAlbumId || !albumData.some((album) => album.id === selectAlbumId)) {
+    selectAlbumId = albumData[0].id;
+  }
+
+  activeAlbumId = selectAlbumId;
+
+  albumData.forEach((album) => {
+    const listItem = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.albumId = String(album.id);
+
+    if (album.id === activeAlbumId) {
+      button.classList.add("event-gallery__list-item--active");
+    }
+
+    const title = document.createElement("strong");
+    title.textContent = album.title;
+
+    const meta = document.createElement("span");
+    meta.className = "text--muted";
+    const photoCountLabel =
+      album.photos.length === 1
+        ? "1 foto"
+        : `${album.photos.length} fotos`;
+    meta.textContent = `${formatFullDate(album.date)} · ${photoCountLabel}`;
+
+    button.append(title, meta);
+    listItem.appendChild(button);
+    eventAlbumList.appendChild(listItem);
+  });
+
+  displayActiveAlbum();
+}
+
+function displayActiveAlbum() {
+  const album = albumData.find((item) => item.id === activeAlbumId);
+
+  if (!album) {
+    eventGalleryEmpty.classList.remove("hidden");
+    eventGalleryAlbum.classList.add("hidden");
+    return;
+  }
+
+  eventGalleryEmpty.classList.add("hidden");
+  eventGalleryAlbum.classList.remove("hidden");
+
+  const photoCountLabel =
+    album.photos.length === 1 ? "1 foto" : `${album.photos.length} fotos`;
+
+  eventAlbumTitle.textContent = album.title;
+  eventAlbumMeta.textContent = `${formatFullDate(album.date)} • ${photoCountLabel}`;
+  eventAlbumDescription.textContent = album.description;
+
+  eventAlbumGrid.innerHTML = "";
+
+  album.photos.forEach((photo, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute(
+      "aria-label",
+      `Abrir foto ${index + 1} do álbum ${album.title}`
+    );
+    const image = document.createElement("img");
+    image.src = photo;
+    image.alt = `${album.title} - foto ${index + 1}`;
+    button.appendChild(image);
+    button.addEventListener("click", () =>
+      openPhotoViewer({
+        photos: album.photos,
+        title: album.title,
+        subtitle: `${formatFullDate(album.date)} • ${photoCountLabel}`,
+        startIndex: index,
+      })
+    );
+    eventAlbumGrid.appendChild(button);
+  });
+}
+
+function readFilesAsDataURLs(files) {
+  return Promise.all(
+    files.map(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = () => reject(new Error("Erro ao ler arquivo"));
+          reader.readAsDataURL(file);
+        })
+    )
+  );
+}
+
+async function handleClassifiedPhotoSelection(event) {
+  const files = Array.from(event.target.files || []);
+
+  if (!files.length) {
+    return;
+  }
+
+  const availableSlots = MAX_CLASSIFIED_PHOTOS - classifiedPhotoDraft.length;
+
+  if (availableSlots <= 0) {
+    window.alert("Você já atingiu o limite de quatro fotos para este anúncio.");
+    classifiedPhotoInput.value = "";
+    return;
+  }
+
+  const filesToProcess = files.slice(0, availableSlots);
+
+  try {
+    const newPhotos = await readFilesAsDataURLs(filesToProcess);
+    classifiedPhotoDraft = classifiedPhotoDraft.concat(newPhotos);
+    updateClassifiedPhotoPreview();
+  } catch (error) {
+    console.error(error);
+    window.alert("Não foi possível carregar algumas fotos. Tente novamente.");
+  } finally {
+    classifiedPhotoInput.value = "";
+  }
+
+  if (files.length > availableSlots) {
+    window.alert(
+      "Algumas imagens não foram adicionadas para manter o limite máximo de quatro fotos."
+    );
+  }
+}
+
+async function handleAlbumPhotoSelection(event) {
+  const files = Array.from(event.target.files || []);
+
+  if (!files.length) {
+    return;
+  }
+
+  const availableSlots = MAX_ALBUM_PHOTOS - albumPhotoDraft.length;
+
+  if (availableSlots <= 0) {
+    window.alert("O álbum já possui o número máximo de fotos.");
+    albumPhotoInput.value = "";
+    return;
+  }
+
+  const filesToProcess = files.slice(0, availableSlots);
+
+  try {
+    const newPhotos = await readFilesAsDataURLs(filesToProcess);
+    albumPhotoDraft = albumPhotoDraft.concat(newPhotos);
+    updateAlbumPhotoPreview();
+  } catch (error) {
+    console.error(error);
+    window.alert("Não foi possível carregar algumas fotos. Tente novamente.");
+  } finally {
+    albumPhotoInput.value = "";
+  }
+
+  if (files.length > availableSlots) {
+    window.alert(
+      "Foram adicionadas apenas as primeiras imagens para manter o limite de 12 fotos por álbum."
+    );
+  }
+}
+
 filterType.addEventListener("change", renderEvents);
 filterLevel.addEventListener("change", renderEvents);
 classifiedSearch.addEventListener("input", renderClassifieds);
+
+classifiedPhotoInput.addEventListener("change", handleClassifiedPhotoSelection);
+albumPhotoInput.addEventListener("change", handleAlbumPhotoSelection);
 
 conditionButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -297,8 +800,20 @@ adminLoginModal.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !adminLoginModal.classList.contains("hidden")) {
+  if (event.key !== "Escape") {
+    return;
+  }
+
+  if (!adminLoginModal.classList.contains("hidden")) {
     closeAdminModal();
+  }
+
+  if (!photoViewerModal.classList.contains("hidden")) {
+    closePhotoViewer();
+  }
+
+  if (!eventGalleryModal.classList.contains("hidden")) {
+    closeEventGalleryModal();
   }
 });
 
@@ -398,7 +913,14 @@ classifiedForm.addEventListener("submit", (event) => {
     return;
   }
 
-  const payload = { title, seller, price, condition, description };
+  const payload = {
+    title,
+    seller,
+    price,
+    condition,
+    description,
+    photos: [...classifiedPhotoDraft],
+  };
 
   if (editingClassifiedIndex !== null) {
     classifiedData[editingClassifiedIndex] = payload;
@@ -412,6 +934,101 @@ classifiedForm.addEventListener("submit", (event) => {
 
 classifiedCancelBtn.addEventListener("click", () => {
   resetClassifiedForm();
+});
+
+albumForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (!isAdmin) {
+    return;
+  }
+
+  if (!albumForm.reportValidity()) {
+    return;
+  }
+
+  if (albumPhotoDraft.length === 0) {
+    window.alert("Inclua ao menos uma foto no álbum.");
+    return;
+  }
+
+  const title = document.getElementById("albumTitle").value.trim();
+  const date = document.getElementById("albumDate").value;
+  const description = document.getElementById("albumDescription").value.trim();
+
+  const payload = {
+    title,
+    date,
+    description,
+    photos: [...albumPhotoDraft],
+  };
+
+  if (editingAlbumId !== null) {
+    const index = albumData.findIndex((album) => album.id === editingAlbumId);
+    if (index !== -1) {
+      albumData[index] = { ...albumData[index], ...payload };
+      activeAlbumId = albumData[index].id;
+    }
+  } else {
+    const newAlbum = {
+      id: ++albumIdCounter,
+      ...payload,
+    };
+    albumData.unshift(newAlbum);
+    activeAlbumId = newAlbum.id;
+  }
+
+  resetAlbumForm();
+  renderAlbumAdminList();
+  renderEventGallery(activeAlbumId);
+});
+
+albumCancelBtn.addEventListener("click", () => {
+  resetAlbumForm();
+});
+
+openAlbumModalBtn.addEventListener("click", openEventGalleryModal);
+photoViewerClose.addEventListener("click", closePhotoViewer);
+eventGalleryClose.addEventListener("click", closeEventGalleryModal);
+
+photoViewerModal.addEventListener("click", (event) => {
+  if (event.target.dataset.action === "close") {
+    closePhotoViewer();
+  }
+});
+
+eventGalleryModal.addEventListener("click", (event) => {
+  if (event.target.dataset.action === "close") {
+    closeEventGalleryModal();
+  }
+});
+
+classifiedList.addEventListener("click", (event) => {
+  const photoButton = event.target.closest(".classified__photos-btn");
+  if (!photoButton) {
+    return;
+  }
+
+  const card = photoButton.closest(".classified");
+  const index = Number(card?.dataset.index);
+  if (Number.isNaN(index)) {
+    return;
+  }
+
+  const item = classifiedData[index];
+  if (!item?.photos?.length) {
+    return;
+  }
+
+  const subtitle = `${
+    item.photos.length === 1 ? "1 foto" : `${item.photos.length} fotos`
+  } • ${getConditionLabel(item.condition)}`;
+
+  openPhotoViewer({
+    photos: item.photos,
+    title: item.title,
+    subtitle,
+  });
 });
 
 classifiedList.addEventListener("click", (event) => {
@@ -434,6 +1051,9 @@ classifiedList.addEventListener("click", (event) => {
     document.getElementById("classifiedPrice").value = item.price;
     document.getElementById("classifiedCondition").value = item.condition;
     document.getElementById("classifiedDescription").value = item.description;
+    classifiedPhotoDraft = [...(item.photos || [])];
+    classifiedPhotoInput.value = "";
+    updateClassifiedPhotoPreview();
     editingClassifiedIndex = index;
     classifiedSubmitBtn.textContent = "Atualizar anúncio";
     classifiedCancelBtn.classList.remove("hidden");
@@ -456,6 +1076,93 @@ classifiedList.addEventListener("click", (event) => {
     }
     renderClassifieds();
   }
+});
+
+albumAdminList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action]");
+  if (!button || !isAdmin) {
+    return;
+  }
+
+  const listItem = button.closest(".album-admin__item");
+  const albumId = Number(listItem?.dataset.albumId);
+
+  if (Number.isNaN(albumId)) {
+    return;
+  }
+
+  const index = albumData.findIndex((album) => album.id === albumId);
+
+  if (index === -1) {
+    return;
+  }
+
+  if (button.dataset.action === "edit") {
+    const album = albumData[index];
+    document.getElementById("albumTitle").value = album.title;
+    document.getElementById("albumDate").value = album.date;
+    document.getElementById("albumDescription").value = album.description;
+    albumPhotoDraft = [...album.photos];
+    albumPhotoInput.value = "";
+    updateAlbumPhotoPreview();
+    editingAlbumId = album.id;
+    albumSubmitBtn.textContent = "Atualizar álbum";
+    albumCancelBtn.classList.remove("hidden");
+    albumForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  if (button.dataset.action === "delete") {
+    const confirmation = window.confirm(
+      "Tem certeza de que deseja excluir este álbum?"
+    );
+    if (!confirmation) {
+      return;
+    }
+
+    const wasActive = activeAlbumId === albumId;
+    albumData.splice(index, 1);
+
+    if (editingAlbumId === albumId) {
+      resetAlbumForm();
+    }
+
+    if (wasActive) {
+      const fallback =
+        albumData[index] || albumData[index - 1] || albumData[0] || null;
+      activeAlbumId = fallback ? fallback.id : null;
+    }
+
+    renderAlbumAdminList();
+    renderEventGallery(activeAlbumId);
+  }
+
+  if (button.dataset.action === "move-up" && index > 0) {
+    const [album] = albumData.splice(index, 1);
+    albumData.splice(index - 1, 0, album);
+    renderAlbumAdminList();
+    renderEventGallery(activeAlbumId);
+  }
+
+  if (button.dataset.action === "move-down" && index < albumData.length - 1) {
+    const [album] = albumData.splice(index, 1);
+    albumData.splice(index + 1, 0, album);
+    renderAlbumAdminList();
+    renderEventGallery(activeAlbumId);
+  }
+});
+
+eventAlbumList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-album-id]");
+  if (!button) {
+    return;
+  }
+
+  const albumId = Number(button.dataset.albumId);
+  if (Number.isNaN(albumId)) {
+    return;
+  }
+
+  renderEventGallery(albumId);
 });
 
 // Realça seção ativa no menu lateral
