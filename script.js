@@ -12,6 +12,64 @@ let classifiedData = [];
 let albumData = [];
 let albumIdCounter = 0;
 
+async function loadEvents() {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .order("date", { ascending: true });
+  if (error) throw error;
+  eventData = data ?? [];
+  console.info("Eventos carregados do Supabase:", {
+    total: eventData.length,
+    preview: eventData.slice(0, 3),
+  });
+}
+
+async function loadClassifieds() {
+  const [{ data: cls, error: e1 }, { data: photos, error: e2 }] =
+    await Promise.all([
+      supabase.from("classifieds").select("*").order("id"),
+      supabase.from("classified_photos").select("*").order("idx"),
+    ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  const pmap = (photos ?? []).reduce((acc, p) => {
+    (acc[p.classified_id] ||= []).push(p.url);
+    return acc;
+  }, {});
+  classifiedData = (cls ?? []).map((c) => ({ ...c, photos: pmap[c.id] ?? [] }));
+  console.info("Classificados carregados do Supabase:", {
+    total: classifiedData.length,
+    preview: classifiedData.slice(0, 3).map(({ photos, ...rest }) => ({
+      ...rest,
+      photoCount: photos.length,
+    })),
+  });
+}
+
+async function loadAlbums() {
+  const [{ data: albs, error: e1 }, { data: photos, error: e2 }] =
+    await Promise.all([
+      supabase.from("albums").select("*").order("date", { ascending: false }),
+      supabase.from("album_photos").select("*").order("idx"),
+    ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  const pmap = (photos ?? []).reduce((acc, p) => {
+    (acc[p.album_id] ||= []).push(p.url);
+    return acc;
+  }, {});
+  albumData = (albs ?? []).map((a) => ({ ...a, photos: pmap[a.id] ?? [] }));
+  albumIdCounter = albumData.length;
+  console.info("Álbuns carregados do Supabase:", {
+    total: albumData.length,
+    preview: albumData.slice(0, 3).map(({ photos, ...rest }) => ({
+      ...rest,
+      photoCount: photos.length,
+    })),
+  });
+}
+
 const eventList = document.getElementById("eventList");
 const eventTemplate = document.getElementById("eventItemTemplate");
 const filterType = document.getElementById("filterType");
@@ -1367,4 +1425,25 @@ const observer = new IntersectionObserver((entries) => {
   observer.observe(section);
 });
 
-updateAdminUI();
+async function initializeApp() {
+  try {
+    await Promise.all([loadEvents(), loadClassifieds(), loadAlbums()]);
+  } catch (error) {
+    console.error("Erro ao carregar dados iniciais do Supabase:", error);
+    return;
+  }
+
+  renderEvents?.();
+  renderClassifieds?.();
+  renderEventGallery?.();
+
+  console.info("Resumo dos dados carregados:", {
+    eventData: eventData.length,
+    albumData: albumData.length,
+    classifiedData: classifiedData.length,
+  });
+
+  updateAdminUI();
+}
+
+initializeApp();
