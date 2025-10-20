@@ -99,6 +99,7 @@ const classifiedList = document.getElementById("classifiedList");
 const classifiedTemplate = document.getElementById("classifiedCardTemplate");
 const classifiedSearch = document.getElementById("classifiedSearch");
 const classifiedPriceInput = document.getElementById("classifiedPrice");
+const priceEl = classifiedPriceInput;
 const conditionButtons = Array.from(
   document.querySelectorAll(".pill-toggle__btn")
 );
@@ -261,13 +262,25 @@ let currentPhotoTitle = "";
 let currentPhotoSubtitle = "";
 let currentPhotoIndex = 0;
 
+export function parsePriceToCents(brl) {
+  const digits = String(brl ?? "")
+    .replace(/[^\d,.-]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+  return Math.round(parseFloat(digits || "0") * 100);
+}
+
+if (typeof window !== "undefined") {
+  window.parsePriceToCents = parsePriceToCents;
+  window.priceEl = priceEl;
+}
+
 function formatCurrencyValue(value) {
-  const digits = String(value ?? "").replace(/[^\d]/g, "");
-  const amount = (parseInt(digits || "0", 10) / 100).toFixed(2);
+  const cents = parsePriceToCents(value);
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(Number(amount));
+  }).format(cents / 100);
 }
 
 function openAdminModal() {
@@ -983,9 +996,14 @@ filterType.addEventListener("change", renderEvents);
 filterLevel.addEventListener("change", renderEvents);
 classifiedSearch.addEventListener("input", renderClassifieds);
 
-if (classifiedPriceInput) {
-  classifiedPriceInput.addEventListener("input", () => {
-    classifiedPriceInput.value = formatCurrencyValue(classifiedPriceInput.value);
+if (priceEl) {
+  priceEl.addEventListener("input", () => {
+    const onlyDigits = priceEl.value.replace(/[^\d]/g, "");
+    const n = (parseInt(onlyDigits || "0", 10) / 100).toFixed(2);
+    priceEl.value = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(Number(n));
   });
 }
 
