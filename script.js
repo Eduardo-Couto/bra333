@@ -7,6 +7,26 @@ const SUPABASE_URL = getMeta("sb-url");
 const SUPABASE_ANON = getMeta("sb-anon");
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+export async function adminLogin(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) throw error;
+  return data.user;
+}
+
+export async function adminLogout() {
+  await supabase.auth.signOut();
+}
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  const isAdmin = !!session;
+  if (typeof updateAdminUI === "function") {
+    updateAdminUI(isAdmin);
+  }
+});
+
 let eventData = [];
 let classifiedData = [];
 let albumData = [];
@@ -99,6 +119,7 @@ const albumCancelBtn = document.getElementById("albumCancelBtn");
 
 const adminLoginModal = document.getElementById("adminLoginModal");
 const adminLoginForm = document.getElementById("adminLoginForm");
+const adminEmailInput = document.getElementById("adminEmail");
 const adminPasswordInput = document.getElementById("adminPassword");
 const adminLoginError = document.getElementById("adminLoginError");
 const adminLoginClose = document.getElementById("adminLoginClose");
@@ -222,7 +243,6 @@ function cloneArray(items) {
   return Array.isArray(items) ? [...items] : [];
 }
 
-const ADMIN_PASSWORD = "flotilha2024";
 const MAX_CLASSIFIED_PHOTOS = 4;
 const MAX_ALBUM_PHOTOS = 12;
 const DEFAULT_ALBUM_ICON = "📸";
@@ -252,13 +272,17 @@ function formatCurrencyValue(value) {
 
 function openAdminModal() {
   adminLoginError.classList.add("hidden");
-  adminPasswordInput.value = "";
-  openModal(adminLoginModal, adminPasswordInput);
+  adminLoginError.textContent =
+    "Não foi possível fazer login. Verifique suas credenciais.";
+  adminLoginForm.reset();
+  const focusTarget = adminEmailInput ?? adminPasswordInput;
+  openModal(adminLoginModal, focusTarget);
 }
 
 function closeAdminModal() {
   closeModal(adminLoginModal);
-  adminPasswordInput.value = "";
+  adminLoginForm.reset();
+  adminLoginError.classList.add("hidden");
 }
 
 function resetEventForm() {
@@ -457,7 +481,8 @@ function closeEventGalleryModal() {
   closeModal(eventGalleryModal);
 }
 
-function updateAdminUI() {
+function updateAdminUI(nextState = isAdmin) {
+  isAdmin = nextState;
   if (isAdmin) {
     adminForm.classList.remove("hidden");
     classifiedForm.classList.remove("hidden");
@@ -975,23 +1000,38 @@ conditionButtons.forEach((button) => {
   });
 });
 
-adminButton.addEventListener("click", () => {
+adminButton.addEventListener("click", async () => {
   if (isAdmin) {
-    isAdmin = false;
-    updateAdminUI();
+    try {
+      await adminLogout();
+    } catch (error) {
+      console.error("Erro ao encerrar sessão do administrador:", error);
+      window.alert("Não foi possível encerrar a sessão. Tente novamente.");
+    }
   } else {
     openAdminModal();
   }
 });
 
-adminLoginForm.addEventListener("submit", (event) => {
+adminLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (adminPasswordInput.value === ADMIN_PASSWORD) {
-    isAdmin = true;
+  if (!adminLoginForm.reportValidity()) {
+    return;
+  }
+
+  adminLoginError.classList.add("hidden");
+
+  const emailValue = adminEmailInput ? adminEmailInput.value.trim() : "";
+  const passwordValue = adminPasswordInput.value;
+
+  try {
+    await adminLogin(emailValue, passwordValue);
     closeAdminModal();
-    updateAdminUI();
-  } else {
+  } catch (error) {
+    console.error("Erro ao realizar login do administrador:", error);
+    adminLoginError.textContent =
+      error?.message ?? "Não foi possível fazer login. Verifique suas credenciais.";
     adminLoginError.classList.remove("hidden");
     adminPasswordInput.focus();
   }
@@ -1446,4 +1486,20 @@ async function initializeApp() {
   updateAdminUI();
 }
 
+async function initializeAuth() {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      throw error;
+    }
+
+    console.info("Resultado de supabase.auth.getSession():", data);
+    updateAdminUI(!!data?.session);
+  } catch (error) {
+    console.error("Erro ao obter sessão do administrador:", error);
+    updateAdminUI(false);
+  }
+}
+
+initializeAuth();
 initializeApp();
