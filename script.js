@@ -45,6 +45,27 @@ async function loadEvents() {
   });
 }
 
+async function createEvent(payload) {
+  const { error } = await supabase.from("events").insert(payload);
+  if (error) throw error;
+  await loadEvents();
+  renderEvents?.();
+}
+
+async function updateEvent(id, payload) {
+  const { error } = await supabase.from("events").update(payload).eq("id", id);
+  if (error) throw error;
+  await loadEvents();
+  renderEvents?.();
+}
+
+async function deleteEvent(id) {
+  const { error } = await supabase.from("events").delete().eq("id", id);
+  if (error) throw error;
+  await loadEvents();
+  renderEvents?.();
+}
+
 async function loadClassifieds() {
   const [{ data: cls, error: e1 }, { data: photos, error: e2 }] =
     await Promise.all([
@@ -1081,7 +1102,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-adminForm.addEventListener("submit", (event) => {
+adminForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!isAdmin) {
@@ -1100,21 +1121,29 @@ adminForm.addEventListener("submit", (event) => {
 
   const payload = { title, date, type, level, description };
 
-  if (editingEventIndex !== null) {
-    eventData[editingEventIndex] = payload;
-  } else {
-    eventData.push(payload);
-  }
+  try {
+    if (editingEventIndex !== null) {
+      const eventToUpdate = eventData[editingEventIndex];
+      if (!eventToUpdate?.id) {
+        throw new Error("Evento inválido selecionado para edição.");
+      }
+      await updateEvent(eventToUpdate.id, payload);
+    } else {
+      await createEvent(payload);
+    }
 
-  resetEventForm();
-  renderEvents();
+    resetEventForm();
+  } catch (error) {
+    console.error("Erro ao salvar evento:", error);
+    window.alert("Não foi possível salvar o evento. Tente novamente.");
+  }
 });
 
 eventCancelBtn.addEventListener("click", () => {
   resetEventForm();
 });
 
-eventList.addEventListener("click", (event) => {
+eventList.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button || !isAdmin) {
     return;
@@ -1127,13 +1156,19 @@ eventList.addEventListener("click", (event) => {
     return;
   }
 
+  const selectedEvent = eventData[index];
+  if (!selectedEvent) {
+    window.alert("Não foi possível localizar os dados do evento selecionado.");
+    return;
+  }
+
   if (button.dataset.action === "edit") {
-    const eventToEdit = eventData[index];
-    document.getElementById("eventTitle").value = eventToEdit.title;
-    document.getElementById("eventDate").value = eventToEdit.date;
-    document.getElementById("eventType").value = eventToEdit.type;
-    document.getElementById("eventLevel").value = eventToEdit.level;
-    document.getElementById("eventDescription").value = eventToEdit.description;
+    document.getElementById("eventTitle").value = selectedEvent.title;
+    document.getElementById("eventDate").value = selectedEvent.date;
+    document.getElementById("eventType").value = selectedEvent.type;
+    document.getElementById("eventLevel").value = selectedEvent.level;
+    document.getElementById("eventDescription").value =
+      selectedEvent.description;
     editingEventIndex = index;
     eventSubmitBtn.textContent = "Atualizar evento";
     eventCancelBtn.classList.remove("hidden");
@@ -1148,13 +1183,22 @@ eventList.addEventListener("click", (event) => {
       return;
     }
 
-    eventData.splice(index, 1);
-    if (editingEventIndex === index) {
-      resetEventForm();
-    } else if (editingEventIndex !== null && editingEventIndex > index) {
-      editingEventIndex -= 1;
+    try {
+      if (!selectedEvent.id) {
+        throw new Error("Evento inválido selecionado para exclusão.");
+      }
+
+      await deleteEvent(selectedEvent.id);
+
+      if (editingEventIndex === index) {
+        resetEventForm();
+      } else if (editingEventIndex !== null && editingEventIndex > index) {
+        editingEventIndex -= 1;
+      }
+    } catch (error) {
+      console.error("Erro ao excluir evento:", error);
+      window.alert("Não foi possível excluir o evento. Tente novamente.");
     }
-    renderEvents();
   }
 });
 
