@@ -7,103 +7,10 @@ const SUPABASE_URL = getMeta("sb-url");
 const SUPABASE_ANON = getMeta("sb-anon");
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const eventData = [
-  {
-    title: "Regata Estadual - Etapa 3",
-    date: "2024-08-24",
-    type: "regata",
-    level: "avancado",
-    description: "Percurso triangular com apoio de bote. Briefing às 09h na sede.",
-  },
-  {
-    title: "Treino de foil pump",
-    date: "2024-08-18",
-    type: "treino",
-    level: "intermediario",
-    description: "Sessão guiada para otimizar velocidade de saída e transições.",
-  },
-  {
-    title: "Clínica para iniciantes",
-    date: "2024-08-11",
-    type: "clinica",
-    level: "iniciante",
-    description: "Ajustes de footstrap, segurança no vento lateral e primeiros voos.",
-  },
-];
-
-const classifiedData = [
-  {
-    title: "Wing Duotone Unit 2023 5m",
-    seller: "Ana Prado",
-    condition: "seminovo",
-    price: "R$\u00a05.400,00",
-    description:
-      "Lona impecável, usado em 6 sessões. Inclui leash original e bolsa rígida.",
-    photos: [
-      "https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1528155124525-03a952c17e79?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1516357231954-91487b459602?auto=format&fit=crop&w=900&q=80",
-    ],
-  },
-  {
-    title: "Foil Axis ART 899 completo",
-    seller: "Lucas Ribeiro",
-    condition: "usado",
-    price: "R$\u00a09.200,00",
-    description:
-      "Mastro 86cm + fuselagem ultra curta. Ideal para regatas de upwind/downwind.",
-    photos: [
-      "https://images.unsplash.com/photo-1528747045269-390fe33c19d4?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1530885167139-40c78f746b0c?auto=format&fit=crop&w=900&q=80",
-    ],
-  },
-  {
-    title: "Prancha custom 95L carbono",
-    seller: "Marina Costa",
-    condition: "novo",
-    price: "R$\u00a011.800,00",
-    description:
-      "Shape assinado por shaper local. Deck em EVA memory foam, trilhos reforçados.",
-    photos: [
-      "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1513352592664-3ad1a0f2ab95?auto=format&fit=crop&w=900&q=80",
-    ],
-  },
-];
-
-const albumData = [
-  {
-    id: 1,
-    title: "Regata Estadual - Praia Vermelha",
-    date: "2024-07-06",
-    description:
-      "Dia clássico de sudoeste constante. Largadas cronometradas e chegada diante do Pão de Açúcar.",
-    icon: "🏁",
-    photos: [
-      "https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?auto=format&fit=crop&w=1100&q=80",
-      "https://images.unsplash.com/photo-1510662145379-0a3f4e49f06e?auto=format&fit=crop&w=1100&q=80",
-      "https://images.unsplash.com/photo-1496865531661-4f2279f0e7c7?auto=format&fit=crop&w=1100&q=80",
-      "https://images.unsplash.com/photo-1506795213374-5f18b0d437ef?auto=format&fit=crop&w=1100&q=80",
-    ],
-  },
-  {
-    id: 2,
-    title: "Treino tático pré-regata",
-    date: "2024-06-22",
-    description:
-      "Marcamos posições de marcação e simulamos situações de boia com troca de role entre os atletas.",
-    icon: "🤝",
-    photos: [
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1100&q=80",
-      "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=1100&q=80",
-      "https://images.unsplash.com/photo-1431440869543-efaf3388c585?auto=format&fit=crop&w=1100&q=80",
-    ],
-  },
-];
-
-let albumIdCounter = albumData.length;
+let eventData = [];
+let classifiedData = [];
+let albumData = [];
+let albumIdCounter = 0;
 
 const eventList = document.getElementById("eventList");
 const eventTemplate = document.getElementById("eventItemTemplate");
