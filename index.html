@@ -492,13 +492,17 @@
           ×
         </button>
         <h2 id="adminLoginTitle">Acesso do administrador</h2>
-        <p class="text--muted">Informe a senha para liberar as ferramentas administrativas.</p>
+        <p class="text--muted">Informe seu e-mail e senha para liberar as ferramentas administrativas.</p>
         <form id="adminLoginForm">
+          <label class="input">
+            <span class="input__label">E-mail</span>
+            <input type="email" id="adminEmail" required autocomplete="username" />
+          </label>
           <label class="input">
             <span class="input__label">Senha</span>
             <input type="password" id="adminPassword" required autocomplete="current-password" />
           </label>
-          <p class="form-error hidden" id="adminLoginError">Senha incorreta. Tente novamente.</p>
+          <p class="form-error hidden" id="adminLoginError">Não foi possível fazer login. Verifique suas credenciais.</p>
           <button type="submit" class="btn btn--primary">Entrar</button>
         </form>
       </div>
