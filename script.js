@@ -1,3 +1,12 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+function getMeta(name) {
+  return document.querySelector(`meta[name="${name}"]`)?.content ?? "";
+}
+const SUPABASE_URL = getMeta("sb-url");
+const SUPABASE_ANON = getMeta("sb-anon");
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
 const eventData = [
   {
     title: "Regata Estadual - Etapa 3",
