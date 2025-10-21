@@ -7,6 +7,11 @@ const SUPABASE_URL = getMeta("sb-url");
 const SUPABASE_ANON = getMeta("sb-anon");
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+const STORAGE_BUCKETS = {
+  classifieds: getMeta("sb-classifieds-bucket") || "classifieds",
+  albums: getMeta("sb-albums-bucket") || "albums",
+};
+
 export async function adminLogin(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -77,7 +82,18 @@ async function loadClassifieds() {
     (acc[p.classified_id] ||= []).push(p.url);
     return acc;
   }, {});
-  classifiedData = (cls ?? []).map((c) => ({ ...c, photos: pmap[c.id] ?? [] }));
+  classifiedData = (cls ?? []).map((c) => {
+    const priceCents =
+      typeof c.price_cents === "number"
+        ? c.price_cents
+        : parsePriceToCents(c.price);
+    return {
+      ...c,
+      price_cents: priceCents,
+      price: formatCurrencyFromCents(priceCents),
+      photos: pmap[c.id] ?? [],
+    };
+  });
   console.info("Classificados carregados do Supabase:", {
     total: classifiedData.length,
     preview: classifiedData.slice(0, 3).map(({ photos, ...rest }) => ({
@@ -85,6 +101,74 @@ async function loadClassifieds() {
       photoCount: photos.length,
     })),
   });
+}
+
+async function uploadClassifiedPhotos(classifiedId, files) {
+  const batch = [];
+  const buckets = uniqueBucketList(
+    STORAGE_BUCKETS.classifieds,
+    STORAGE_BUCKETS.albums
+  );
+  const timestamp = Date.now();
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const safeName = sanitizeFileName(file?.name);
+    const basePath = `${classifiedId}/${timestamp}_${i}_${safeName}`;
+    const { publicUrl } = await uploadFileToAvailableBucket(file, basePath, buckets);
+    batch.push({ classified_id: classifiedId, url: publicUrl, idx: i });
+  }
+
+  if (batch.length) {
+    const { error } = await supabase.from("classified_photos").insert(batch);
+    if (error) throw error;
+  }
+}
+
+async function createClassified(payload, files) {
+  const toInsert = {
+    title: payload.title,
+    seller: payload.seller,
+    condition: payload.condition,
+    price_cents: parsePriceToCents(payload.price),
+    description: payload.description,
+  };
+  const { data, error } = await supabase
+    .from("classifieds")
+    .insert(toInsert)
+    .select()
+    .single();
+  if (error) throw error;
+  if (files?.length) await uploadClassifiedPhotos(data.id, files);
+  await loadClassifieds();
+  renderClassifieds?.();
+}
+
+async function updateClassified(id, payload, files) {
+  const toUpdate = {
+    title: payload.title,
+    seller: payload.seller,
+    condition: payload.condition,
+    price_cents: parsePriceToCents(payload.price),
+    description: payload.description,
+  };
+  const { error } = await supabase
+    .from("classifieds")
+    .update(toUpdate)
+    .eq("id", id);
+  if (error) throw error;
+  if (files?.length) {
+    await uploadClassifiedPhotos(id, files);
+  }
+  await loadClassifieds();
+  renderClassifieds?.();
+}
+
+async function deleteClassified(id) {
+  const { error } = await supabase.from("classifieds").delete().eq("id", id);
+  if (error) throw error;
+  await loadClassifieds();
+  renderClassifieds?.();
 }
 
 async function loadAlbums() {
@@ -111,18 +195,17 @@ async function loadAlbums() {
 
 async function uploadAlbumPhotos(albumId, files) {
   const batch = [];
+  const buckets = uniqueBucketList(STORAGE_BUCKETS.albums);
+  const timestamp = Date.now();
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const path = `${albumId}/${Date.now()}_${i}_${file.name}`;
-    const { error: upErr } = await supabase.storage
-      .from("albums")
-      .upload(path, file);
-    if (upErr) throw upErr;
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("albums").getPublicUrl(path);
+    const safeName = sanitizeFileName(file?.name);
+    const basePath = `${albumId}/${timestamp}_${i}_${safeName}`;
+    const { publicUrl } = await uploadFileToAvailableBucket(file, basePath, buckets);
     batch.push({ album_id: albumId, url: publicUrl, idx: i });
   }
+
   if (batch.length) {
     const { error } = await supabase.from("album_photos").insert(batch);
     if (error) throw error;
@@ -327,6 +410,136 @@ function cloneArray(items) {
   return Array.isArray(items) ? [...items] : [];
 }
 
+function sanitizeFileName(name) {
+  const value = String(name ?? "").trim();
+  if (!value) {
+    return "arquivo";
+  }
+
+  const lastDot = value.lastIndexOf(".");
+  const baseName = lastDot === -1 ? value : value.slice(0, lastDot);
+  const extension = lastDot === -1 ? "" : value.slice(lastDot + 1);
+
+  const normalizedBase = baseName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
+  const normalizedExt = extension
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toLowerCase();
+
+  const safeBase = normalizedBase || "arquivo";
+  const safeExt = normalizedExt ? `.${normalizedExt}` : "";
+  return `${safeBase}${safeExt}`;
+}
+
+function isStorageConflictError(error) {
+  if (!error) {
+    return false;
+  }
+
+  const status = Number(error.statusCode);
+  if (Number.isFinite(status) && status === 409) {
+    return true;
+  }
+
+  const message = String(error.message || "").toLowerCase();
+  return message.includes("already exists");
+}
+
+function isStorageBucketMissingError(error) {
+  if (!error) {
+    return false;
+  }
+
+  const status = Number(error.statusCode);
+  if (Number.isFinite(status) && status === 404) {
+    return true;
+  }
+
+  const message = String(error.message || "").toLowerCase();
+  return message.includes("bucket") || message.includes("not found");
+}
+
+function uniqueBucketList(...names) {
+  return [...new Set(names.filter((name) => typeof name === "string" && name.length))];
+}
+
+async function uploadFileToAvailableBucket(file, basePath, buckets, maxAttempts = 5) {
+  if (!file) {
+    throw new Error("Arquivo de foto inválido.");
+  }
+
+  const candidates = uniqueBucketList(...buckets);
+  if (!candidates.length) {
+    throw new Error("Nenhum bucket de armazenamento configurado.");
+  }
+
+  const uploadOptions = {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || "application/octet-stream",
+  };
+
+  let attempt = 0;
+  let lastError = null;
+
+  while (attempt < maxAttempts) {
+    const path = attempt === 0 ? basePath : `${basePath}_${attempt}`;
+    lastError = null;
+
+    for (const bucket of candidates) {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload(path, file, uploadOptions);
+
+      if (!error) {
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from(bucket).getPublicUrl(path);
+        if (!publicUrl) {
+          lastError = new Error("URL pública indisponível para o arquivo enviado.");
+          continue;
+        }
+        return { publicUrl };
+      }
+
+      lastError = error;
+
+      if (isStorageConflictError(error)) {
+        break;
+      }
+
+      if (isStorageBucketMissingError(error)) {
+        continue;
+      }
+
+      throw error;
+    }
+
+    if (lastError && isStorageConflictError(lastError)) {
+      attempt += 1;
+      continue;
+    }
+
+    if (lastError && isStorageBucketMissingError(lastError)) {
+      break;
+    }
+
+    if (!lastError) {
+      break;
+    }
+  }
+
+  throw lastError ?? new Error("Falha ao enviar arquivo ao armazenamento.");
+}
+
 const MAX_CLASSIFIED_PHOTOS = 4;
 const MAX_ALBUM_PHOTOS = 12;
 const DEFAULT_ALBUM_ICON = "📸";
@@ -364,6 +577,14 @@ function formatCurrencyValue(value) {
     style: "currency",
     currency: "BRL",
   }).format(cents / 100);
+}
+
+function formatCurrencyFromCents(cents) {
+  const numericCents = Number.isFinite(Number(cents)) ? Number(cents) : 0;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(numericCents / 100);
 }
 
 function openAdminModal() {
@@ -443,8 +664,20 @@ function renderPhotoPreview(container, photos, { removeHandler, emptyMessage, al
 }
 
 function updateClassifiedPhotoPreview() {
-  renderPhotoPreview(classifiedPhotoPreview, classifiedPhotoDraft, {
+  const previews = classifiedPhotoDraft.map((photo) => photo?.preview ?? "");
+  renderPhotoPreview(classifiedPhotoPreview, previews, {
     removeHandler: (index) => {
+      const item = classifiedPhotoDraft[index];
+      if (
+        editingClassifiedIndex !== null &&
+        item &&
+        !(item.file instanceof File)
+      ) {
+        window.alert(
+          "A remoção de fotos existentes ainda não é suportada. Exclua o anúncio e crie um novo para alterar as imagens."
+        );
+        return;
+      }
       classifiedPhotoDraft.splice(index, 1);
       updateClassifiedPhotoPreview();
     },
@@ -1036,7 +1269,11 @@ async function handleClassifiedPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    classifiedPhotoDraft = [...classifiedPhotoDraft, ...newPhotos];
+    const draftEntries = newPhotos.map((preview, index) => ({
+      preview,
+      file: filesToProcess[index],
+    }));
+    classifiedPhotoDraft = [...classifiedPhotoDraft, ...draftEntries];
     updateClassifiedPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -1288,7 +1525,7 @@ eventList.addEventListener("click", async (event) => {
   }
 });
 
-classifiedForm.addEventListener("submit", (event) => {
+classifiedForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!isAdmin) {
@@ -1318,17 +1555,28 @@ classifiedForm.addEventListener("submit", (event) => {
     price: formattedPrice,
     condition,
     description,
-    photos: cloneArray(classifiedPhotoDraft),
   };
 
-  if (editingClassifiedIndex !== null) {
-    classifiedData[editingClassifiedIndex] = payload;
-  } else {
-    classifiedData.push(payload);
-  }
+  const newFiles = classifiedPhotoDraft
+    .map((photo) => photo?.file)
+    .filter((file) => file instanceof File);
 
-  resetClassifiedForm();
-  renderClassifieds();
+  try {
+    if (editingClassifiedIndex !== null) {
+      const classifiedToUpdate = classifiedData[editingClassifiedIndex];
+      if (!classifiedToUpdate?.id) {
+        throw new Error("Anúncio inválido selecionado para edição.");
+      }
+      await updateClassified(classifiedToUpdate.id, payload, newFiles);
+    } else {
+      await createClassified(payload, newFiles);
+    }
+
+    resetClassifiedForm();
+  } catch (error) {
+    console.error("Erro ao salvar anúncio:", error);
+    window.alert("Não foi possível salvar o anúncio. Tente novamente.");
+  }
 });
 
 classifiedCancelBtn.addEventListener("click", () => {
@@ -1428,7 +1676,7 @@ classifiedList.addEventListener("click", (event) => {
   });
 });
 
-classifiedList.addEventListener("click", (event) => {
+classifiedList.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button || !isAdmin) {
     return;
@@ -1450,7 +1698,11 @@ classifiedList.addEventListener("click", (event) => {
     }
     document.getElementById("classifiedCondition").value = item.condition;
     document.getElementById("classifiedDescription").value = item.description;
-    classifiedPhotoDraft = cloneArray(item.photos);
+    classifiedPhotoDraft = item.photos.map((url) => ({
+      preview: url,
+      file: null,
+      url,
+    }));
     classifiedPhotoInput.value = "";
     updateClassifiedPhotoPreview();
     editingClassifiedIndex = index;
@@ -1467,13 +1719,19 @@ classifiedList.addEventListener("click", (event) => {
       return;
     }
 
-    classifiedData.splice(index, 1);
-    if (editingClassifiedIndex === index) {
-      resetClassifiedForm();
-    } else if (editingClassifiedIndex !== null && editingClassifiedIndex > index) {
-      editingClassifiedIndex -= 1;
+    try {
+      const item = classifiedData[index];
+      if (!item?.id) {
+        throw new Error("Anúncio inválido selecionado para exclusão.");
+      }
+      await deleteClassified(item.id);
+      if (editingClassifiedIndex !== null) {
+        resetClassifiedForm();
+      }
+    } catch (error) {
+      console.error("Erro ao excluir anúncio:", error);
+      window.alert("Não foi possível excluir o anúncio. Tente novamente.");
     }
-    renderClassifieds();
   }
 });
 
