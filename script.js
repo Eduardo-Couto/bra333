@@ -30,7 +30,6 @@ supabase.auth.onAuthStateChange((_event, session) => {
 let eventData = [];
 let classifiedData = [];
 let albumData = [];
-let albumIdCounter = 0;
 
 async function loadEvents() {
   const { data, error } = await supabase
@@ -101,7 +100,6 @@ async function loadAlbums() {
     return acc;
   }, {});
   albumData = (albs ?? []).map((a) => ({ ...a, photos: pmap[a.id] ?? [] }));
-  albumIdCounter = albumData.length;
   console.info("Álbuns carregados do Supabase:", {
     total: albumData.length,
     preview: albumData.slice(0, 3).map(({ photos, ...rest }) => ({
@@ -109,6 +107,70 @@ async function loadAlbums() {
       photoCount: photos.length,
     })),
   });
+}
+
+async function uploadAlbumPhotos(albumId, files) {
+  const batch = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const path = `${albumId}/${Date.now()}_${i}_${file.name}`;
+    const { error: upErr } = await supabase.storage
+      .from("albums")
+      .upload(path, file);
+    if (upErr) throw upErr;
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("albums").getPublicUrl(path);
+    batch.push({ album_id: albumId, url: publicUrl, idx: i });
+  }
+  if (batch.length) {
+    const { error } = await supabase.from("album_photos").insert(batch);
+    if (error) throw error;
+  }
+}
+
+async function createAlbum(payload, files) {
+  const { data: album, error } = await supabase
+    .from("albums")
+    .insert({
+      title: payload.title,
+      date: payload.date,
+      description: payload.description,
+      icon: payload.icon,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  if (files?.length) await uploadAlbumPhotos(album.id, files);
+  activeAlbumId = album.id;
+  await loadAlbums();
+  renderAlbumAdminList();
+  renderEventGallery?.(activeAlbumId);
+}
+
+async function updateAlbum(id, payload) {
+  const { error } = await supabase
+    .from("albums")
+    .update({
+      title: payload.title,
+      date: payload.date,
+      description: payload.description,
+      icon: payload.icon,
+    })
+    .eq("id", id);
+  if (error) throw error;
+  activeAlbumId = id;
+  await loadAlbums();
+  renderAlbumAdminList();
+  renderEventGallery?.(activeAlbumId);
+}
+
+async function deleteAlbum(id) {
+  const { error } = await supabase.from("albums").delete().eq("id", id);
+  if (error) throw error;
+  await loadAlbums();
+  renderAlbumAdminList();
+  renderEventGallery?.();
 }
 
 const eventList = document.getElementById("eventList");
@@ -392,8 +454,19 @@ function updateClassifiedPhotoPreview() {
 }
 
 function updateAlbumPhotoPreview() {
-  renderPhotoPreview(albumPhotoPreview, albumPhotoDraft, {
+  const previews = albumPhotoDraft.map((photo) => photo.preview);
+  renderPhotoPreview(albumPhotoPreview, previews, {
     removeHandler: (index) => {
+      const item = albumPhotoDraft[index];
+      if (!item) {
+        return;
+      }
+      if (editingAlbumId !== null && !item.file) {
+        window.alert(
+          "A remoção de fotos existentes ainda não é suportada. Exclua o álbum e crie um novo para alterar as imagens."
+        );
+        return;
+      }
       albumPhotoDraft.splice(index, 1);
       updateAlbumPhotoPreview();
     },
@@ -708,7 +781,8 @@ function renderAlbumAdminList() {
 
     const cover = document.createElement("img");
     cover.className = "album-admin__cover";
-    cover.src = album.photos[0];
+    const coverSrc = album.photos[0] || DEFAULT_ALBUM_COVER;
+    cover.src = coverSrc;
     cover.alt = `Capa do álbum ${album.title}`;
 
     const media = document.createElement("div");
@@ -985,6 +1059,14 @@ async function handleAlbumPhotoSelection(event) {
     return;
   }
 
+  if (editingAlbumId !== null) {
+    window.alert(
+      "A atualização das fotos de álbuns existentes ainda não é suportada. Exclua o álbum e crie outro para alterar as imagens."
+    );
+    albumPhotoInput.value = "";
+    return;
+  }
+
   const availableSlots = MAX_ALBUM_PHOTOS - albumPhotoDraft.length;
 
   if (availableSlots <= 0) {
@@ -997,7 +1079,11 @@ async function handleAlbumPhotoSelection(event) {
 
   try {
     const newPhotos = await readFilesAsDataURLs(filesToProcess);
-    albumPhotoDraft = [...albumPhotoDraft, ...newPhotos];
+    const draftEntries = newPhotos.map((preview, index) => ({
+      preview,
+      file: filesToProcess[index],
+    }));
+    albumPhotoDraft = [...albumPhotoDraft, ...draftEntries];
     updateAlbumPhotoPreview();
   } catch (error) {
     console.error(error);
@@ -1249,7 +1335,7 @@ classifiedCancelBtn.addEventListener("click", () => {
   resetClassifiedForm();
 });
 
-albumForm.addEventListener("submit", (event) => {
+albumForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!isAdmin) {
@@ -1257,11 +1343,6 @@ albumForm.addEventListener("submit", (event) => {
   }
 
   if (!albumForm.reportValidity()) {
-    return;
-  }
-
-  if (albumPhotoDraft.length === 0) {
-    window.alert("Inclua ao menos uma foto no álbum.");
     return;
   }
 
@@ -1275,27 +1356,28 @@ albumForm.addEventListener("submit", (event) => {
     date,
     description,
     icon,
-    photos: cloneArray(albumPhotoDraft),
   };
 
-  if (editingAlbumId !== null) {
-    const index = albumData.findIndex((album) => album.id === editingAlbumId);
-    if (index !== -1) {
-      albumData[index] = { ...albumData[index], ...payload };
-      activeAlbumId = albumData[index].id;
-    }
-  } else {
-    const newAlbum = {
-      id: ++albumIdCounter,
-      ...payload,
-    };
-    albumData.unshift(newAlbum);
-    activeAlbumId = newAlbum.id;
+  const newFiles = albumPhotoDraft
+    .map((photo) => photo.file)
+    .filter((file) => file instanceof File);
+
+  if (editingAlbumId === null && newFiles.length === 0) {
+    window.alert("Inclua ao menos uma foto no álbum.");
+    return;
   }
 
-  resetAlbumForm();
-  renderAlbumAdminList();
-  renderEventGallery(activeAlbumId);
+  try {
+    if (editingAlbumId !== null) {
+      await updateAlbum(editingAlbumId, payload);
+    } else {
+      await createAlbum(payload, newFiles);
+    }
+    resetAlbumForm();
+  } catch (error) {
+    console.error("Erro ao salvar álbum:", error);
+    window.alert("Não foi possível salvar o álbum. Tente novamente.");
+  }
 });
 
 albumCancelBtn.addEventListener("click", () => {
@@ -1395,7 +1477,7 @@ classifiedList.addEventListener("click", (event) => {
   }
 });
 
-albumAdminList.addEventListener("click", (event) => {
+albumAdminList.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button || !isAdmin) {
     return;
@@ -1422,7 +1504,11 @@ albumAdminList.addEventListener("click", (event) => {
     if (albumIconSelect) {
       albumIconSelect.value = album.icon || DEFAULT_ALBUM_ICON;
     }
-    albumPhotoDraft = cloneArray(album.photos);
+    albumPhotoDraft = album.photos.map((url) => ({
+      preview: url,
+      file: null,
+      url,
+    }));
     albumPhotoInput.value = "";
     updateAlbumPhotoPreview();
     editingAlbumId = album.id;
@@ -1439,21 +1525,15 @@ albumAdminList.addEventListener("click", (event) => {
       return;
     }
 
-    const wasActive = activeAlbumId === albumId;
-    albumData.splice(index, 1);
-
-    if (editingAlbumId === albumId) {
-      resetAlbumForm();
+    try {
+      await deleteAlbum(albumId);
+      if (editingAlbumId === albumId) {
+        resetAlbumForm();
+      }
+    } catch (error) {
+      console.error("Erro ao excluir álbum:", error);
+      window.alert("Não foi possível excluir o álbum. Tente novamente.");
     }
-
-    if (wasActive) {
-      const fallback =
-        albumData[index] || albumData[index - 1] || albumData[0] || null;
-      activeAlbumId = fallback ? fallback.id : null;
-    }
-
-    renderAlbumAdminList();
-    renderEventGallery(activeAlbumId);
   }
 
   if (button.dataset.action === "move-up" && index > 0) {
