@@ -214,6 +214,26 @@ a {
   grid-column: 1 / -1;
 }
 
+/* Ajustes de layout desktop */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 64px;
+}
+
+@media (min-width: 1280px) {
+  .content__header {
+    align-items: center;
+    gap: 32px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .widget-grid {
+    grid-template-columns: repeat(2, minmax(360px, 1fr));
+  }
+}
+
 @media (min-width: 720px) {
   .widget-grid {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
