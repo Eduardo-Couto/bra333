@@ -228,12 +228,6 @@ a {
   }
 }
 
-@media (min-width: 1440px) {
-  .widget-grid {
-    grid-template-columns: repeat(2, minmax(360px, 1fr));
-  }
-}
-
 @media (min-width: 720px) {
   .widget-grid {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
@@ -244,6 +238,12 @@ a {
 
   .widget-grid > .forecast--widget {
     grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1440px) {
+  .widget-grid {
+    grid-template-columns: repeat(2, minmax(360px, 1fr));
   }
 }
 
